@@ -590,7 +590,7 @@
     authSwitch.textContent=create?'Sign in':'Create an account';
     authMessage.textContent=''; authMessage.className='auth-message';
   }
-  function localTarget(){ try{return JSON.parse(localStorage.getItem('dsa-sheet-target-v1')||'null');}catch(e){return null;} }
+  function localTarget(){ try{return JSON.parse(localStorage.getItem(storageKey(TARGET_KEY))||'null');}catch(e){return null;} }
   function mergeMaps(a,b){ return Object.assign({},a||{},b||{}); }
   function queueCloudSave(){
     if(!currentUser || !cloudEnabled || !supabaseClient) return;
@@ -609,12 +609,25 @@
     if(result.error){ console.warn('Cloud load failed:',result.error.message); return; }
     var row=result.data;
     if(row){
-      solved=mergeMaps(solved,row.solved); bookmarks=mergeMaps(bookmarks,row.bookmarks);
-      try{localStorage.setItem(STORE_KEY,JSON.stringify(solved));localStorage.setItem(BOOKMARK_KEY,JSON.stringify(bookmarks));}catch(e){}
-      if(row.target){ try{localStorage.setItem(TARGET_KEY,JSON.stringify(row.target));}catch(e){} targetStart.value=row.target.start||targetStart.value; targetEnd.value=row.target.end||targetEnd.value; targetTopic.value=row.target.topic||targetTopic.value; }
-      if(row.target){ targetNote.textContent=(row.target.topic||'All topics')+' · '+row.target.start+' to '+row.target.end; viewCalendar.classList.add('show'); }
+      // Cloud state is authoritative for the signed-in user.
+      // Never merge it with another user's browser-local state.
+      solved = (row.solved && typeof row.solved === 'object') ? row.solved : {};
+      bookmarks = (row.bookmarks && typeof row.bookmarks === 'object') ? row.bookmarks : {};
+      try{
+        localStorage.setItem(storageKey(STORE_KEY),JSON.stringify(solved));
+        localStorage.setItem(storageKey(BOOKMARK_KEY),JSON.stringify(bookmarks));
+      }catch(e){}
+      if(row.target){
+        try{localStorage.setItem(storageKey(TARGET_KEY),JSON.stringify(row.target));}catch(e){}
+        targetStart.value=row.target.start||targetStart.value;
+        targetEnd.value=row.target.end||targetEnd.value;
+        targetTopic.value=row.target.topic||targetTopic.value;
+        targetNote.textContent=(row.target.topic||'All topics')+' · '+row.target.start+' to '+row.target.end;
+        viewCalendar.classList.add('show');
+      }
       renderTargetPreview(); updateStats(); render();
     }
+    // If this user has no cloud row yet, save only this user's scoped local state.
     queueCloudSave();
   }
   async function ensureAccess(user){
@@ -638,7 +651,16 @@
     if(logoutButton) logoutButton.style.display = user ? 'inline-flex' : 'none';
 
     currentUser=user; cloudEnabled=false;
-    if(!user){ currentUser=null; showAuth(); setAuthMode('signin'); return; }
+    if(!user){
+      currentUser=null;
+      loadLocalUserState();
+      showAuth();
+      setAuthMode('signin');
+      return;
+    }
+    // Switch browser storage to this authenticated user's namespace.
+    // This prevents different accounts on the same browser from sharing progress.
+    loadLocalUserState();
     var account=document.getElementById('accountButton'); if(account) account.textContent=user.email ? 'Sign out · '+user.email : 'Sign out';
     var access=await ensureAccess(user);
     if(!access || !access.approved){ showPendingApproval(); return; }
@@ -655,18 +677,30 @@
   var STORE_KEY = 'dsa-sheet-progress-v1';
   var BOOKMARK_KEY = 'dsa-sheet-bookmarks-v1';
   var solved = {};
-  try{
-    var saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-    if (saved && typeof saved === 'object') solved = saved;
-  }catch(e){}
   var bookmarks = {};
-  try{ bookmarks = JSON.parse(localStorage.getItem(BOOKMARK_KEY) || '{}') || {}; }catch(e){}
+  function storageKey(baseKey){
+    return currentUser ? baseKey + ':' + currentUser.id : baseKey + ':guest';
+  }
+  function loadLocalUserState(){
+    try{
+      var saved = JSON.parse(localStorage.getItem(storageKey(STORE_KEY)) || '{}');
+      solved = (saved && typeof saved === 'object') ? saved : {};
+    }catch(e){ solved = {}; }
+    try{
+      var savedBookmarks = JSON.parse(localStorage.getItem(storageKey(BOOKMARK_KEY)) || '{}');
+      bookmarks = (savedBookmarks && typeof savedBookmarks === 'object') ? savedBookmarks : {};
+    }catch(e){ bookmarks = {}; }
+  }
+  loadLocalUserState();
 
   function persist(){
-    try{ localStorage.setItem(STORE_KEY, JSON.stringify(solved)); }catch(e){}
+    try{ localStorage.setItem(storageKey(STORE_KEY), JSON.stringify(solved)); }catch(e){}
     queueCloudSave();
   }
-  function persistBookmarks(){ try{ localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmarks)); }catch(e){} queueCloudSave(); }
+  function persistBookmarks(){
+    try{ localStorage.setItem(storageKey(BOOKMARK_KEY), JSON.stringify(bookmarks)); }catch(e){}
+    queueCloudSave();
+  }
 
   // group items by topic, preserving TOPICS order
   var byTopic = {};
@@ -988,7 +1022,7 @@
   [targetStart,targetEnd,targetTopic].forEach(function(el){ el.addEventListener('input',renderTargetPreview); el.addEventListener('change',renderTargetPreview); });
   document.getElementById('saveTarget').addEventListener('click', function(){
     var target={start:targetStart.value,end:targetEnd.value,topic:targetTopic.value};
-    try{localStorage.setItem(TARGET_KEY,JSON.stringify(target));}catch(e){}
+    try{localStorage.setItem(storageKey(TARGET_KEY),JSON.stringify(target));}catch(e){}
     targetNote.textContent=target.topic+' · '+target.start+' to '+target.end;
     viewCalendar.classList.add('show');
     updateDailyProgress();
@@ -1018,15 +1052,15 @@
     await supabaseClient.auth.signOut();
   });
 
-
   document.getElementById('logoutButton').addEventListener('click', async function(){
     if(!currentUser) return;
     if(!confirm('Sign out of this account? Your progress is safely synced.')) return;
-    this.disabled = true;
+    this.disabled=true;
     await saveCloudProgress();
     await supabaseClient.auth.signOut();
-    this.disabled = false;
+    this.disabled=false;
   });
+
 
   buildRail();
   buildSegbar();
