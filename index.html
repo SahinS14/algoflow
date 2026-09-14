@@ -561,6 +561,8 @@
   var cloudEnabled = false;
   var cloudSaveTimer = null;
   var authMode = 'signin';
+  var authGeneration = 0;
+  var authReady = false;
 
   var authScreen = document.getElementById('authScreen');
   var authLoading = document.getElementById('authLoading');
@@ -590,45 +592,77 @@
     authSwitch.textContent=create?'Sign in':'Create an account';
     authMessage.textContent=''; authMessage.className='auth-message';
   }
-  function localTarget(){ try{return JSON.parse(localStorage.getItem(storageKey(TARGET_KEY))||'null');}catch(e){return null;} }
+  function localTarget(){
+    try{return JSON.parse(localStorage.getItem(storageKey(TARGET_KEY))||'null');}
+    catch(e){return null;}
+  }
   function mergeMaps(a,b){ return Object.assign({},a||{},b||{}); }
+  function clearTargetState(){
+    try{ localStorage.removeItem(storageKey(TARGET_KEY)); }catch(e){}
+    targetStart.value=localDate();
+    targetEnd.value=addDays(dateValue(targetStart.value),89).toISOString().slice(0,10);
+    targetTopic.value='All topics';
+    targetNote.textContent='No study target set.';
+    viewCalendar.classList.remove('show');
+    renderTargetPreview();
+  }
   function queueCloudSave(){
     if(!currentUser || !cloudEnabled || !supabaseClient) return;
     clearTimeout(cloudSaveTimer);
-    cloudSaveTimer=setTimeout(saveCloudProgress,450);
+    cloudSaveTimer=setTimeout(function(){ saveCloudProgress(); },450);
   }
   async function saveCloudProgress(){
-    if(!currentUser || !supabaseClient) return;
-    var payload={user_id:currentUser.id,solved:solved,bookmarks:bookmarks,target:localTarget(),updated_at:new Date().toISOString()};
+    if(!currentUser || !cloudEnabled || !supabaseClient) return;
+    var userId=currentUser.id;
+    var payload={
+      user_id:userId,
+      solved:solved,
+      bookmarks:bookmarks,
+      target:localTarget(),
+      updated_at:new Date().toISOString()
+    };
     var result=await supabaseClient.from('dsa_progress').upsert(payload,{onConflict:'user_id'});
     if(result.error) console.warn('Cloud sync failed:',result.error.message);
   }
-  async function loadCloudProgress(){
+  async function loadCloudProgress(generation){
     if(!currentUser || !cloudEnabled || !supabaseClient) return;
-    var result=await supabaseClient.from('dsa_progress').select('solved, bookmarks, target').eq('user_id',currentUser.id).maybeSingle();
+    var userId=currentUser.id;
+    var result=await supabaseClient.from('dsa_progress')
+      .select('solved, bookmarks, target')
+      .eq('user_id',userId)
+      .maybeSingle();
+    if(generation !== authGeneration || !currentUser || currentUser.id !== userId) return;
     if(result.error){ console.warn('Cloud load failed:',result.error.message); return; }
     var row=result.data;
     if(row){
-      // Cloud state is authoritative for the signed-in user.
-      // Never merge it with another user's browser-local state.
-      solved = (row.solved && typeof row.solved === 'object') ? row.solved : {};
-      bookmarks = (row.bookmarks && typeof row.bookmarks === 'object') ? row.bookmarks : {};
+      solved=(row.solved && typeof row.solved==='object') ? row.solved : {};
+      bookmarks=(row.bookmarks && typeof row.bookmarks==='object') ? row.bookmarks : {};
       try{
         localStorage.setItem(storageKey(STORE_KEY),JSON.stringify(solved));
         localStorage.setItem(storageKey(BOOKMARK_KEY),JSON.stringify(bookmarks));
       }catch(e){}
+
       if(row.target){
         try{localStorage.setItem(storageKey(TARGET_KEY),JSON.stringify(row.target));}catch(e){}
-        targetStart.value=row.target.start||targetStart.value;
-        targetEnd.value=row.target.end||targetEnd.value;
-        targetTopic.value=row.target.topic||targetTopic.value;
+        targetStart.value=row.target.start||localDate();
+        targetEnd.value=row.target.end||addDays(dateValue(targetStart.value),89).toISOString().slice(0,10);
+        targetTopic.value=row.target.topic||'All topics';
         targetNote.textContent=(row.target.topic||'All topics')+' · '+row.target.start+' to '+row.target.end;
         viewCalendar.classList.add('show');
+      }else{
+        clearTargetState();
       }
-      renderTargetPreview(); updateStats(); render();
+      renderTargetPreview();
+      updateStats();
+      render();
+    }else{
+      // Brand-new account: start with only this user's scoped browser state.
+      // Never inherit guest or another account's state.
+      renderTargetPreview();
+      updateStats();
+      render();
+      await saveCloudProgress();
     }
-    // If this user has no cloud row yet, save only this user's scoped local state.
-    queueCloudSave();
   }
   async function ensureAccess(user){
     var result=await supabaseClient.from('dsa_access').select('approved').eq('user_id',user.id).maybeSingle();
@@ -647,33 +681,63 @@
     authMessage.textContent='Please return after approval, then sign in again.'; authMessage.className='auth-message ok';
   }
   async function setSignedInUser(user){
-    var logoutButton = document.getElementById('logoutButton');
-    if(logoutButton) logoutButton.style.display = user ? 'inline-flex' : 'none';
+    var generation=++authGeneration;
+    clearTimeout(cloudSaveTimer);
+    cloudEnabled=false;
+    authReady=false;
+    currentUser=null;
 
-    currentUser=user; cloudEnabled=false;
+    // Always wipe in-memory state before loading the next account.
+    solved={};
+    bookmarks={};
+    clearTargetState();
+    updateStats();
+    render();
+
+    var logoutButton=document.getElementById('logoutButton');
+    if(logoutButton) logoutButton.style.display='none';
+
     if(!user){
-      currentUser=null;
-      loadLocalUserState();
+      var accountSignedOut=document.getElementById('accountButton');
+      if(accountSignedOut) accountSignedOut.textContent='Account';
       showAuth();
       setAuthMode('signin');
       return;
     }
-    // Switch browser storage to this authenticated user's namespace.
-    // This prevents different accounts on the same browser from sharing progress.
+
+    currentUser=user;
+    // Load only the namespace belonging to this authenticated user.
     loadLocalUserState();
-    var account=document.getElementById('accountButton'); if(account) account.textContent=user.email ? 'Sign out · '+user.email : 'Sign out';
+    loadTarget();
+    updateStats();
+    render();
+
+    var account=document.getElementById('accountButton');
+    if(account) account.textContent=user.email ? 'Sign out · '+user.email : 'Sign out';
+    if(logoutButton) logoutButton.style.display='inline-flex';
+
     var access=await ensureAccess(user);
+    if(generation !== authGeneration || !currentUser || currentUser.id !== user.id) return;
     if(!access || !access.approved){ showPendingApproval(); return; }
-    cloudEnabled=true; authScreen.style.display='none';
-    await loadCloudProgress();
+
+    cloudEnabled=true;
+    authReady=true;
+    authScreen.style.display='none';
+    await loadCloudProgress(generation);
   }
   async function initAuth(){
     if(!supabaseClient){showAuth('Could not load secure sign-in. Check your connection.');return;}
     var sessionResult=await supabaseClient.auth.getSession();
     await setSignedInUser(sessionResult.data&&sessionResult.data.session?sessionResult.data.session.user:null);
-    supabaseClient.auth.onAuthStateChange(function(event,session){ if(event==='SIGNED_OUT') setSignedInUser(null); });
+    supabaseClient.auth.onAuthStateChange(function(event,session){
+      if(event==='SIGNED_OUT'){
+        setSignedInUser(null);
+      }else if(event==='SIGNED_IN' || event==='TOKEN_REFRESHED' || event==='USER_UPDATED'){
+        var user=session&&session.user;
+        if(user && (!currentUser || currentUser.id!==user.id)) setSignedInUser(user);
+      }
+    });
   }
-
   var STORE_KEY = 'dsa-sheet-progress-v1';
   var BOOKMARK_KEY = 'dsa-sheet-bookmarks-v1';
   var solved = {};
@@ -691,8 +755,6 @@
       bookmarks = (savedBookmarks && typeof savedBookmarks === 'object') ? savedBookmarks : {};
     }catch(e){ bookmarks = {}; }
   }
-  loadLocalUserState();
-
   function persist(){
     try{ localStorage.setItem(storageKey(STORE_KEY), JSON.stringify(solved)); }catch(e){}
     queueCloudSave();
@@ -738,6 +800,9 @@
   var dailyCount = document.getElementById('dailyCount');
   var viewCalendar = document.getElementById('viewCalendar');
   var TARGET_KEY = 'dsa-sheet-target-v1';
+  // Every persisted target is scoped to the authenticated user ID.
+  // Never read/write the legacy global target key.
+
 
   var activeTopic = null;
   var savedOnly = false;
@@ -914,7 +979,7 @@
   }
 
   function updateDailyProgress(){
-    var saved; try{saved=JSON.parse(localStorage.getItem(TARGET_KEY)||'null');}catch(e){}
+    var saved; try{saved=JSON.parse(localStorage.getItem(storageKey(TARGET_KEY))||'null');}catch(e){}
     if(!saved){ dailyCount.textContent='Set a target to see today’s plan.'; return; }
     var schedule=getSchedule();
     var today=new Date(); today.setHours(0,0,0,0);
@@ -963,7 +1028,7 @@
   }
   function loadTarget(){
     TOPICS.forEach(function(t){ var o=document.createElement('option');o.value=t;o.textContent=t;targetTopic.appendChild(o); });
-    var saved; try{ saved=JSON.parse(localStorage.getItem(TARGET_KEY)||'null'); }catch(e){}
+    var saved; try{ saved=JSON.parse(localStorage.getItem(storageKey(TARGET_KEY))||'null'); }catch(e){}
     targetStart.value=(saved&&saved.start)||localDate(); targetEnd.value=(saved&&saved.end)||localDate(); if(!saved) targetEnd.value=addDays(dateValue(targetStart.value),89).toISOString().slice(0,10); targetTopic.value=(saved&&saved.topic)||'All topics';
     if(saved){ targetNote.textContent = saved.topic + ' · ' + saved.start + ' to ' + saved.end; viewCalendar.classList.add('show'); }
     renderTargetPreview();
@@ -1065,9 +1130,6 @@
   buildRail();
   buildSegbar();
   buildList();
-  loadTarget();
-  updateStats();
-  render();
   setAuthMode('signin');
   initAuth();
 })();
