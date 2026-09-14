@@ -1,0 +1,1019 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Algoflow — DSA practice tracker</title>
+<meta name="description" content="A personal DSA practice tracker with progress, topics and a date-based study calendar." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EAF1F7;
+    --bg-line: #D3E1EB;
+    --surface: #FFFFFF;
+    --surface-2: #F5F9FC;
+    --ink: #10243D;
+    --ink-soft: #2B4258;
+    --muted: #5D7690;
+    --faint: #8CA1B5;
+    --border: #D3E0EA;
+    --border-strong: #B7CBDA;
+    --accent: #0E8C87;
+    --accent-ink: #06504D;
+    --accent-soft: #DCF0EE;
+    --amber: #C97F1E;
+    --amber-soft: #FBEBD4;
+    --danger: #C1503D;
+    --radius-s: 3px;
+    --radius-m: 6px;
+    --shadow-card: 0 1px 0 rgba(16,36,61,0.04);
+    --maxw: 920px;
+  }
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--bg-line) 1px, transparent 1px) 0 0/100% 28px,
+      linear-gradient(90deg, var(--bg-line) 1px, transparent 1px) 0 0/28px 100%,
+      var(--bg);
+    background-attachment: local;
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  a{ color: inherit; }
+  .wrap{
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 20px 120px;
+  }
+  code, .mono{ font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+  /* ---------- header ---------- */
+  header.top{
+    padding: 56px 0 28px;
+  }
+  .kicker{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px 4px 8px;
+    border-radius: var(--radius-s);
+    margin-bottom: 18px;
+  }
+  .kicker svg{ width:13px; height:13px; }
+  h1.title{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(34px, 6vw, 52px);
+    line-height: 1.05;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  h1.title em{
+    font-style: normal;
+    color: var(--accent-ink);
+  }
+  .subline{
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0 0 22px;
+  }
+  .credit-row{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    align-items: center;
+  }
+  .credit-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 1px;
+  }
+  .credit-link:hover{ color: var(--accent-ink); border-color: var(--accent-ink); }
+  .credit-link svg{ width:14px; height:14px; opacity:.75; }
+
+  /* ---------- stats / progress ---------- */
+  .stats{
+    margin-top: 34px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    padding: 22px 24px 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .stats-top{
+    display:flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    margin-bottom: 14px;
+  }
+  .stats-figure{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--ink);
+  }
+  .stats-figure .of{
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 17px;
+    color: var(--faint);
+  }
+  .stats-pct{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .segbar{
+    display:flex;
+    width:100%;
+    height: 14px;
+    border-radius: 3px;
+    overflow:hidden;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .segbar .seg{
+    position:relative;
+    height:100%;
+    border-right: 1px solid var(--surface);
+    background: var(--surface-2);
+  }
+  .segbar .seg:last-child{ border-right:none; }
+  .segbar .seg .fill{
+    height:100%;
+    background: var(--accent);
+    width: 0%;
+  }
+  .stats-foot{
+    display:flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--faint);
+  }
+
+  /* ---------- topic rail ---------- */
+  .rail-outer{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: linear-gradient(var(--bg) 78%, transparent);
+    padding: 14px 0 10px;
+    margin-top: 26px;
+  }
+  .rail{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding: 3px 2px 10px;
+    scrollbar-width: thin;
+  }
+  .rail::-webkit-scrollbar{ height:6px; }
+  .rail::-webkit-scrollbar-thumb{ background: var(--border-strong); border-radius:6px; }
+  .pill{
+    flex: 0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding: 7px 12px 7px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor:pointer;
+    white-space:nowrap;
+    user-select:none;
+  }
+  .pill:hover{ border-color: var(--border-strong); }
+  .pill.active{
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #EAF1F7;
+  }
+  .pill .ring{
+    width:16px; height:16px; flex:0 0 auto;
+  }
+  .pill .n{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--faint);
+  }
+  .pill.active .n{ color: #A9C3D6; }
+
+  /* ---------- controls ---------- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 10px;
+    align-items:center;
+    margin: 4px 0 30px;
+  }
+  .search{
+    flex: 1 1 240px;
+    position:relative;
+  }
+  .search input{
+    width:100%;
+    padding: 10px 14px 10px 36px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .search input:focus{ outline: 2px solid var(--accent); outline-offset: 1px; }
+  .search svg{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:15px; height:15px; color: var(--faint);
+  }
+  .toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding: 9px 12px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toggle input{ accent-color: var(--accent); width:14px; height:14px; }
+  .toggle.on{ border-color: var(--accent); color: var(--accent-ink); background: var(--accent-soft); }
+  .btn-reset{
+    padding: 9px 12px;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13.5px;
+    color: var(--muted);
+    cursor:pointer;
+    font-family: inherit;
+  }
+  .btn-reset:hover{ color: var(--danger); border-color: var(--danger); }
+
+  /* ---------- topic sections ---------- */
+  .topic-section{
+    margin-bottom: 10px;
+    scroll-margin-top: 90px;
+  }
+  .topic-head{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    padding: 16px 2px 10px;
+    border-bottom: 1px solid var(--border-strong);
+    margin-bottom: 4px;
+  }
+  .topic-head .idx{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--faint);
+    width: 22px;
+  }
+  .topic-head h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+    flex: 0 0 auto;
+  }
+  .topic-head .tcount{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--faint);
+  }
+  .topic-head .tbar{
+    flex:1;
+    height: 5px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow:hidden;
+    border: 1px solid var(--border);
+  }
+  .topic-head .tbar .fill{
+    height:100%;
+    background: var(--accent);
+    width:0%;
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns: 26px 1fr auto;
+    align-items:start;
+    gap: 4px 12px;
+    padding: 10px 2px;
+    border-bottom: 1px solid var(--border);
+  }
+  .row:hover{ background: rgba(255,255,255,0.55); }
+  .row.done .q-link{ color: var(--faint); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+  .row.done .meta{ opacity:.6; }
+  .row.hidden{ display:none; }
+  .chk{
+    margin-top: 2px;
+    width:16px; height:16px;
+    accent-color: var(--accent);
+    cursor:pointer;
+  }
+  .q-main{ min-width:0; }
+  .q-link{
+    display:inline-flex;
+    align-items:baseline;
+    gap: 6px;
+    font-size: 14.5px;
+    color: var(--ink);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .q-link:hover{ color: var(--accent-ink); }
+  .q-link .go{
+    width:11px; height:11px;
+    color: var(--faint);
+    flex: 0 0 auto;
+    transform: translateY(1px);
+  }
+  .q-link:hover .go{ color: var(--accent); }
+  .meta{
+    margin-top: 4px;
+    display:flex;
+    flex-wrap:wrap;
+    gap: 6px;
+    align-items:center;
+  }
+  .tag{
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .tag.bonus{ color: var(--amber); background: var(--amber-soft); border-color: #EEDBB2; }
+  .companies{
+    font-size: 12px;
+    color: var(--faint);
+    max-width: 46ch;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .companies:hover{ white-space:normal; overflow:visible; }
+  .note{
+    font-size: 12px;
+    color: var(--amber);
+  }
+  .row-idx{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--faint);
+    text-align:right;
+    padding-top: 3px;
+    min-width: 30px;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--faint);
+    font-size: 14px;
+    display:none;
+  }
+
+  footer{
+    text-align:center;
+    padding: 40px 0 20px;
+    color: var(--faint);
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 640px){
+    .wrap{ padding: 0 14px 100px; }
+    header.top{ padding: 38px 0 20px; }
+    .row{ grid-template-columns: 22px 1fr; }
+    .row-idx{ display:none; }
+    .companies{ max-width: 100%; white-space: normal; }
+  }
+
+  /* ---------- journey dashboard redesign ---------- */
+  :root{ --navy:#050d24; --blue:#2f62ed; --violet:#593fce; --canvas:#dfe6f5; --mint:#34d399; }
+  body{background:var(--canvas); color:var(--navy);}
+  body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 80% -5%,#dce4ff 0,transparent 31rem),linear-gradient(120deg,rgba(49,94,251,.045) 1px,transparent 1px);background-size:auto,28px 28px;z-index:-1}
+  .wrap{max-width:1320px;padding-bottom:72px}
+  header.top{padding:36px 0 26px;display:grid;grid-template-columns:1.35fr .65fr;gap:20px;align-items:stretch}
+  header.top>.kicker, header.top>.title, header.top>.subline, header.top>.credit-row{grid-column:1}
+  .kicker{background:#e8edff;color:#315efb;border-radius:999px;font-weight:600;padding:6px 11px;width:max-content;margin-bottom:14px}
+  h1.title{font-size:clamp(38px,5vw,60px);letter-spacing:-.055em;color:var(--navy);margin-bottom:12px}
+  h1.title em{color:var(--blue)} .subline{font-size:16px;line-height:1.65;color:#53627c;max-width:57ch}.credit-row{margin-top:4px}
+  .stats{grid-column:2;grid-row:1/5;margin:0;border:0;border-radius:24px;padding:28px;background:linear-gradient(145deg,#050d24,#10265f);box-shadow:0 20px 45px rgba(5,13,36,.38);color:white;position:relative;overflow:hidden}
+  .stats:after{content:"";position:absolute;width:230px;height:230px;border:28px solid rgba(116,149,255,.18);border-radius:50%;right:-95px;bottom:-120px}.stats-top{position:relative;z-index:1}.stats-figure{color:white;font-size:42px}.stats-figure .of{font-size:14px;color:#bdcbff;display:block;margin-top:2px}.stats-pct{background:#90f6d3;color:#0c5b47;font-weight:700}.segbar{height:10px;border:0;background:rgba(255,255,255,.16)}.segbar .seg{border-right-color:#213b81;background:rgba(255,255,255,.1)}.segbar .seg .fill{background:#6ee7c2}.stats-foot{color:#b8c7fc;position:relative;z-index:1}
+  .journey-actions{grid-column:1/-1;display:flex;gap:10px;align-items:center;margin-top:8px}.journey-btn{border:0;border-radius:12px;background:var(--blue);color:white;padding:12px 16px;font:600 14px 'IBM Plex Sans',sans-serif;cursor:pointer;box-shadow:0 10px 22px rgba(49,94,251,.23)}.journey-btn:hover{background:#244ee2}.journey-note{font-size:13px;color:#64748b}
+  .rail-outer{background:transparent;padding:0;margin:4px 0 18px}.rail{padding:4px 1px 10px;gap:8px}.pill{border:0;border-radius:10px;box-shadow:0 1px 3px rgba(20,36,75,.08);padding:9px 12px;background:white;color:#52617a;font-weight:500}.pill.active{background:var(--navy);color:white}.pill.active .n{color:#b7c6ff}
+  .controls{background:white;border:1px solid #e5eaff;padding:12px;border-radius:16px;box-shadow:0 8px 28px rgba(21,44,118,.06);margin:0 0 22px}.search input{border:0;background:#f5f7fe;border-radius:10px;padding:12px 14px 12px 38px}.toggle{border:1px solid #e6eafd;border-radius:9px;background:#fff}.btn-reset{margin-left:auto;border:0;background:transparent;color:#8994a9;font:500 13px 'IBM Plex Sans',sans-serif;cursor:pointer;padding:9px}
+  .topic-section{background:white;border:1px solid #e3e8f7;border-radius:18px;box-shadow:0 8px 25px rgba(25,49,113,.055);margin-bottom:18px;overflow:hidden}.topic-head{background:linear-gradient(100deg,#fbfcff,#f2f5ff);padding:16px 20px;border-bottom:1px solid #e9edfa}.topic-head h2{font-size:18px}.topic-head .idx{color:var(--blue)}.tbar{background:#e3e8f8}.tbar .fill{background:linear-gradient(90deg,#315efb,#7a5cff)}
+  .table-labels{display:grid;grid-template-columns:76px minmax(250px,1fr) 110px 86px 170px;align-items:center;color:#7b879e;background:#fafbff;border-bottom:1px solid #edf0fa;font:600 11px 'IBM Plex Mono',monospace;letter-spacing:.04em;text-transform:uppercase;padding:12px 20px 10px}
+  .row{grid-template-columns:44px minmax(240px,1fr) 110px 86px minmax(120px,170px) 30px;gap:10px;padding:15px 20px;align-items:center;border-bottom:1px solid #eef1f8}.row:hover{background:#fafcff}.chk{width:20px;height:20px;accent-color:var(--blue)}.q-link{font-size:15px;font-weight:600;color:#1b2946}.q-link:hover{color:var(--blue)}.meta{margin-top:4px}.companies{font-size:12px;background:#f2f4fa;color:#65718a;border-radius:5px;padding:2px 6px;max-width:100%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}.practice-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:#315efb;background:#edf1ff;border:1px solid #dbe4ff;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700}.practice-link:hover{background:#dce5ff}.level{font:600 11px 'IBM Plex Mono',monospace;border-radius:99px;padding:5px 8px;width:max-content}.level.easy{background:#dcfce7;color:#167547}.level.medium{background:#fff0d5;color:#bb6808}.level.hard{background:#ffe1e4;color:#c03248}
+  .calendar-modal{position:fixed;inset:0;background:rgba(9,17,41,.5);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}.calendar-modal.open{display:flex}.calendar-card{width:min(720px,100%);background:white;border-radius:22px;padding:26px;box-shadow:0 24px 70px rgba(9,17,41,.28);position:relative}.close-modal{position:absolute;right:18px;top:14px;border:0;background:transparent;font-size:26px;color:#667085;cursor:pointer}.calendar-card h2{margin:0;font-family:'Space Grotesk';font-size:26px}.calendar-card p{color:#68758c;margin:5px 0 20px}.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.setup-grid label{display:grid;gap:7px;font-size:13px;color:#56637b;font-weight:600}.setup-grid input,.setup-grid select{border:1px solid #dae1f1;border-radius:10px;padding:12px;font:14px 'IBM Plex Sans';color:#17233e;background:#fbfcff}.cal-summary{margin-top:18px;border-radius:14px;background:#f4f6ff;padding:16px;display:flex;justify-content:space-between;align-items:center}.calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:17px}.calendar-days div{min-height:66px;border:1px solid #e8ecf7;border-radius:10px;padding:8px;font:12px 'IBM Plex Mono';color:#52617a}.calendar-days .target-day{background:#edf1ff;border-color:#a9bbff;color:#244edb}.calendar-days small{display:block;margin-top:7px;font:600 10px 'IBM Plex Sans';color:#315efb}.save-target{margin-top:20px;width:100%;border:0;border-radius:10px;padding:13px;background:var(--navy);color:white;font:600 14px 'IBM Plex Sans';cursor:pointer}
+  @media(max-width:760px){header.top{display:block;padding-top:24px}.stats{margin-top:22px}.journey-actions{flex-wrap:wrap}.table-labels{display:none}.row{grid-template-columns:32px 1fr 30px;gap:8px}.practice-link,.level{grid-column:2}.practice-link{width:max-content}.row-idx{grid-column:3;grid-row:1;}.setup-grid{grid-template-columns:1fr}.calendar-days{gap:4px}.calendar-days div{min-height:52px;padding:5px}.controls{gap:7px}.btn-reset{margin-left:0}}
+  .brand{display:flex;align-items:center;gap:10px;font:700 14px 'Space Grotesk',sans-serif;color:#551cbf;letter-spacing:.02em}.brand-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#5b43d6);display:grid;place-items:center;color:white;box-shadow:0 8px 16px rgba(37,99,235,.25)}.brand-mark:after{content:'∑';font-size:18px}.title em{color:#5b43d6}.calendar-card{max-height:calc(100vh - 30px);overflow:auto}.calendar-days{grid-template-columns:repeat(7,minmax(86px,1fr))}.calendar-days div{min-height:92px;background:#f8faff}.calendar-days .target-day{background:#d5e1ff;border-color:#7798fa}.view-calendar{display:none;border:1px solid #9fb5ff;border-radius:12px;background:#dce6ff;color:#173faa;padding:11px 14px;font:700 14px 'IBM Plex Sans',sans-serif;cursor:pointer}.view-calendar.show{display:inline-block}.rail-outer{display:none}.topic-section{display:block;background:#fdfdff;border-color:#c6d2eb;box-shadow:0 12px 28px rgba(16,38,95,.12)}.topic-section.is-open{border-color:#809df4}.topic-section:not(.is-open)>div:not(.topic-head){display:none}.empty-state{display:none!important}.level{display:none}.table-labels{grid-template-columns:76px minmax(250px,1fr) 110px 170px}.row{grid-template-columns:44px minmax(240px,1fr) 110px minmax(120px,170px) 32px 30px}.topic-head{cursor:pointer;min-height:64px}.topic-head:after{content:'⌄';font:700 20px 'IBM Plex Sans';color:#315efb;margin-left:8px}.topic-section.is-open .topic-head:after{content:'⌃'}.calendar-days small{line-height:1.35}.target-topic{font-weight:700;color:#1e3a8a}.calendar-only .setup-grid,.calendar-only .save-target{display:none}.daily-count{font:700 14px 'IBM Plex Mono',monospace;color:#b9c9ff;margin-top:16px}.bookmark{border:0;background:transparent;color:#8a98b4;font-size:21px;cursor:pointer;padding:4px}.bookmark:hover,.bookmark.saved{color:#f59e0b}.saved-toggle{border:1px solid #d7e0f4;border-radius:9px;background:#fff;font:600 13px 'IBM Plex Sans';color:#52617a;padding:9px 11px;cursor:pointer}.saved-toggle.on{background:#fff5d9;color:#a15c00;border-color:#f2ce7a}@media(max-width:760px){.row{grid-template-columns:32px 1fr 30px}.bookmark{grid-column:3;grid-row:1}.row-idx{display:none}.stats{padding:22px}.daily-count{font-size:12px}}
+  .topic-head{background:linear-gradient(105deg,#3e63ad,#214ca4)!important;border-bottom:0!important}.topic-head h2,.topic-head .tcount{color:#fff!important}.topic-head .idx{color:#72e5cc!important}.topic-head .tcount{background:rgba(255,255,255,.12);border-radius:999px;padding:5px 9px}.topic-head .tbar{background:rgba(255,255,255,.18)}.topic-head .tbar .fill{background:#72e5cc}.topic-head:after{color:#fff!important}.topic-section:nth-child(3n+2) .topic-head{background:linear-gradient(105deg,#3e63ad,#214ca4)!important}.topic-section:nth-child(3n) .topic-head{background:linear-gradient(105deg,#3e63ad,#214ca4)!important}.topic-section{background:#fff!important}.topic-section.is-open{border-color:#4f77e8!important}.account-btn{margin-left:auto;border:1px solid #cbd7f4;border-radius:12px;background:#fff;color:#243b72;padding:10px 13px;font:700 13px 'IBM Plex Sans';cursor:pointer}.account-btn:hover{background:#eef3ff}.auth-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#071431 0%,#173d96 52%,#5a43c9 100%);overflow:auto}.auth-screen:before{content:'';position:fixed;width:460px;height:460px;border-radius:50%;border:56px solid rgba(155,183,255,.13);top:-200px;right:-140px}.auth-card{position:relative;width:min(430px,100%);padding:34px;border:1px solid rgba(255,255,255,.25);border-radius:26px;background:rgba(255,255,255,.97);box-shadow:0 28px 90px rgba(2,8,25,.42)}.auth-brand{display:flex;align-items:center;gap:10px;color:#244edb;font:700 15px 'Space Grotesk';letter-spacing:.06em}.auth-heading{margin:26px 0 7px;color:#081839;font:700 30px/1.15 'Space Grotesk';letter-spacing:-.04em}.auth-copy{margin:0 0 23px;color:#61708c;line-height:1.6}.auth-form{display:grid;gap:14px}.auth-form label{display:grid;gap:7px;font:600 13px 'IBM Plex Sans';color:#43516b}.auth-form input{width:100%;box-sizing:border-box;border:1px solid #d7dfef;border-radius:11px;padding:13px 14px;color:#13274e;font:15px 'IBM Plex Sans';outline:none}.auth-form input:focus{border-color:#4774ef;box-shadow:0 0 0 3px rgba(71,116,239,.12)}.auth-submit{border:0;border-radius:11px;padding:14px;background:linear-gradient(110deg,#264fdb,#6144cb);color:#fff;font:700 15px 'IBM Plex Sans';cursor:pointer;box-shadow:0 12px 22px rgba(45,78,205,.25)}.auth-submit:disabled{opacity:.6;cursor:wait}.auth-switch{margin:19px 0 0;color:#68758d;text-align:center;font-size:13px}.auth-switch button{border:0;background:none;color:#315efb;font:700 13px 'IBM Plex Sans';cursor:pointer}.auth-message{min-height:20px;margin:14px 0 0;color:#bd2345;font-size:13px;line-height:1.45}.auth-message.ok{color:#08774d}.auth-loading{color:#65718a;font:600 14px 'IBM Plex Sans';text-align:center}@media(max-width:760px){.account-btn{margin-left:0}.auth-card{padding:26px 22px}.auth-heading{font-size:27px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand"><span class="brand-mark"></span>ALGOFLOW</div>
+    <h1 class="title">Build your<br><em>problem-solving rhythm.</em></h1>
+    <p class="subline">A focused workspace for tracking progress, practicing consistently, and finishing your own DSA plan.</p>
+
+    <div class="stats">
+      <div class="stats-top">
+        <div class="stats-figure"><span id="solvedCount">0</span> <span class="of" id="totalCount">/ 415 solved</span></div>
+        <div class="stats-pct" id="pctLabel">0%</div>
+      </div>
+      <div class="segbar" id="segbar"></div>
+      <div class="stats-foot">
+        <span>Arrays</span>
+        <span>Segment Trees</span>
+      </div>
+      <div class="daily-count" id="dailyCount">Set a target to see today’s plan.</div>
+    </div>
+    <div class="journey-actions">
+      <button class="journey-btn" id="openCalendar" type="button">Set study target</button>
+      <button class="view-calendar" id="viewCalendar" type="button">Show calendar</button>
+      <span class="journey-note" id="targetNote">Set a start and end date to create your practice schedule.</span>
+      <button class="account-btn" id="accountButton" type="button">Account</button>
+    </div>
+  </header>
+
+  <div class="rail-outer">
+    <div class="rail" id="rail"></div>
+  </div>
+
+  <div class="controls">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="searchInput" type="text" placeholder="Search a problem, topic or company…" autocomplete="off" />
+    </div>
+    <label class="toggle" id="hideSolvedWrap">
+      <input type="checkbox" id="hideSolved" />
+      Hide solved
+    </label>
+    <label class="toggle" id="bonusOnlyWrap">
+      <input type="checkbox" id="bonusOnly" />
+      Bonus only
+    </label>
+    <button class="saved-toggle" id="savedOnly" type="button">☆ Saved</button>
+    <button class="btn-reset" id="resetBtn" type="button">Reset progress</button>
+  </div>
+
+  <main id="list"></main>
+  <p class="empty-state" id="emptyState">Choose a topic above to open its problem set.</p>
+
+  <footer>Your progress, bookmarks, and study target are securely synced to your account.</footer>
+</div>
+
+<div class="calendar-modal" id="calendarModal" role="dialog" aria-modal="true" aria-labelledby="calendarTitle">
+  <div class="calendar-card" id="calendarCard">
+    <button class="close-modal" id="closeCalendar" type="button" aria-label="Close target planner">×</button>
+    <h2 id="calendarTitle">Create your study plan</h2>
+    <p id="calendarIntro">Choose your time window and focus. We’ll distribute the selected questions across every day.</p>
+    <div class="setup-grid">
+      <label>Start date <input id="targetStart" type="date"></label>
+      <label>End date <input id="targetEnd" type="date"></label>
+      <label>Focus topic <select id="targetTopic"><option value="All topics">All topics</option></select></label>
+    </div>
+    <div class="cal-summary"><span><strong id="planLength">—</strong><br><small>in your selected schedule</small></span><span id="planPace">—</span></div>
+    <div class="calendar-days" id="calendarDays" aria-label="Study plan calendar"></div>
+    <button class="save-target" id="saveTarget" type="button">Save my target</button>
+  </div>
+</div>
+
+<div class="auth-screen" id="authScreen" aria-live="polite">
+  <div class="auth-card">
+    <div class="auth-brand"><span class="brand-mark"></span>ALGOFLOW</div>
+    <div id="authLoading" class="auth-loading">Checking your session…</div>
+    <div id="authContent" hidden>
+      <h2 class="auth-heading" id="authHeading">Welcome back</h2>
+      <p class="auth-copy" id="authCopy">Sign in to keep your DSA journey safe and synced across devices.</p>
+      <form class="auth-form" id="authForm">
+        <label>Email address<input id="authEmail" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+        <label>Password<input id="authPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="At least 6 characters"></label>
+        <button class="auth-submit" id="authSubmit" type="submit">Sign in</button>
+      </form>
+      <p class="auth-switch"><span id="authSwitchText">New here?</span> <button id="authSwitch" type="button">Create an account</button></p>
+      <p class="auth-message" id="authMessage" role="status"></p>
+    </div>
+  </div>
+</div>
+
+<script id="dsa-data" type="application/json">{"topics": ["Arrays", "Strings", "2D Arrays", "Searching & Sorting", "Backtracking", "Linked List", "Stacks & Queues", "Greedy", "Binary Trees", "Binary Search Trees", "Heaps & Hashing", "Graphs", "Tries", "DP", "Bit Manipulation", "Segment Trees"], "items": [{"id": "m1", "topic": "Arrays", "q": "Maximum and Minimum Element in an Array", "link": "https://www.geeksforgeeks.org/maximum-and-minimum-in-an-array/", "companies": "ABCO Accolite Amazon Cisco Hike Microsoft Snapdeal VMWare Google Adobe", "note": null, "bonus": false}, {"id": "m2", "topic": "Arrays", "q": "Reverse the Array", "link": "https://www.geeksforgeeks.org/write-a-program-to-reverse-an-array-or-string/", "companies": "Infosys Moonfrog Labs", "note": null, "bonus": false}, {"id": "m3", "topic": "Arrays", "q": "Maximum-Subarray", "link": "https://leetcode.com/problems/maximum-subarray/", "companies": "Microsoft + Facebook Interview Qs", "note": "use Kadane's Algorithm", "bonus": false}, {"id": "m4", "topic": "Arrays", "q": "Contains Duplicate", "link": "https://leetcode.com/problems/contains-duplicate/", "companies": "Amazon Interview Qs", "note": null, "bonus": false}, {"id": "m5", "topic": "Arrays", "q": "Chocolate Distribution Problem", "link": "https://www.geeksforgeeks.org/chocolate-distribution-problem/", "companies": "Amazon Interview Qs", "note": null, "bonus": false}, {"id": "m6", "topic": "Arrays", "q": "Search in Rotated Sorted Array", "link": "https://leetcode.com/problems/search-in-rotated-sorted-array/", "companies": "Microsoft Google Adobe Amazon D-E-Shaw Flipkart Hike Intuit MakeMyTrip Paytm", "note": null, "bonus": false}, {"id": "m7", "topic": "Arrays", "q": "Next Permutation", "link": "https://leetcode.com/problems/next-permutation/", "companies": "Uber + Goldman Sachs + Adobe Interview Qs", "note": null, "bonus": false}, {"id": "m8", "topic": "Arrays", "q": "Best time to Buy and Sell Stock", "link": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/", "companies": "Amazon D-E-Shaw Directi Flipkart Goldman Sachs Intuit MakeMyTrip Microsoft Ola Cabs Oracle Paytm Pubmatic Quikr Salesforce Sapient Swiggy Walmart Media.net Google", "note": null, "bonus": false}, {"id": "m9", "topic": "Arrays", "q": "Repeat and Missing Number Array", "link": "https://www.interviewbit.com/problems/repeat-and-missing-number-array/", "companies": "Amazon Interview Qs", "note": null, "bonus": false}, {"id": "m10", "topic": "Arrays", "q": "Kth-Largest Element in an Array", "link": "https://leetcode.com/problems/kth-largest-element-in-an-array/", "companies": "Amazon Microsoft Walmart Adobe", "note": null, "bonus": false}, {"id": "m11", "topic": "Arrays", "q": "Trapping Rain Water", "link": "https://leetcode.com/problems/trapping-rain-water/", "companies": "Samsung Interview Qs", "note": "use auxiliary arrays", "bonus": false}, {"id": "m12", "topic": "Arrays", "q": "Product of Array Except Self", "link": "https://leetcode.com/problems/product-of-array-except-self/", "companies": "Microsoft + Facebook Interview Qs", "note": null, "bonus": false}, {"id": "m13", "topic": "Arrays", "q": "Maximum Product Subarray", "link": "https://leetcode.com/problems/maximum-product-subarray/", "companies": "Amazon D-E-Shaw Microsoft Morgan Stanley OYO Rooms Google", "note": null, "bonus": false}, {"id": "m14", "topic": "Arrays", "q": "Find Minimum in Rotated Sorted Array", "link": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/", "companies": "Adobe Amazon Microsoft Morgan Stanley Samsung Snapdeal Times Internet", "note": null, "bonus": false}, {"id": "m15", "topic": "Arrays", "q": "Find Pair with Sum in Sorted & Rotated Array", "link": "https://www.geeksforgeeks.org/given-a-sorted-and-rotated-array-find-if-there-is-a-pair-with-a-given-sum/?ref=lbp", "companies": "Microsoft + Google + Apple Interview Qs", "note": null, "bonus": false}, {"id": "m16", "topic": "Arrays", "q": "3Sum", "link": "https://leetcode.com/problems/3sum/", "companies": "Adobe Amazon Microsoft Morgan Stanley Samsung Snapdeal Times Internet", "note": null, "bonus": false}, {"id": "m17", "topic": "Arrays", "q": "Container With Most Water", "link": "https://leetcode.com/problems/container-with-most-water/", "companies": "Flipkart + Dunzo Interview Qs", "note": "use 2 pointer approach", "bonus": false}, {"id": "m18", "topic": "Arrays", "q": "Given Sum Pair", "link": "https://www.geeksforgeeks.org/given-a-sorted-and-rotated-array-find-if-there-is-a-pair-with-a-given-sum/", "companies": "Infosys + Amazon + Flipkart Interview Qs", "note": null, "bonus": false}, {"id": "m19", "topic": "Arrays", "q": "Kth - Smallest Element", "link": "https://practice.geeksforgeeks.org/problems/kth-smallest-element5635/1", "companies": "ABCO Accolite Amazon Cisco Hike Microsoft Snapdeal VMWare Google Adobe", "note": null, "bonus": false}, {"id": "m20", "topic": "Arrays", "q": "Merge Overlapping Intervals", "link": "https://www.geeksforgeeks.org/merging-intervals/", "companies": "Google Interview Qs", "note": null, "bonus": false}, {"id": "m21", "topic": "Arrays", "q": "Find Minimum Number of Merge Operations to Make an Array Palindrome", "link": "https://www.geeksforgeeks.org/find-minimum-number-of-merge-operations-to-make-an-array-palindrome/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m22", "topic": "Arrays", "q": "Given an Array of Numbers Arrange the Numbers to Form the Biggest Number", "link": "https://www.geeksforgeeks.org/given-an-array-of-numbers-arrange-the-numbers-to-form-the-biggest-number/", "companies": "Barclays Interview Qs", "note": null, "bonus": false}, {"id": "m23", "topic": "Arrays", "q": "Space Optimization Using Bit Manipulations", "link": "https://www.geeksforgeeks.org/space-optimization-using-bit-manipulations/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m24", "topic": "Arrays", "q": "Subarray Sum Divisible K", "link": "https://www.geeksforgeeks.org/longest-subarray-sum-divisible-k/", "companies": "Snapdeal Microsoft", "note": null, "bonus": false}, {"id": "m25", "topic": "Arrays", "q": "Print all Possible Combinations of r Elements in a Given Array of Size n", "link": "https://www.geeksforgeeks.org/print-all-possible-combinations-of-r-elements-in-a-given-array-of-size-n/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m26", "topic": "Arrays", "q": "Mo's Algorithm", "link": "https://www.geeksforgeeks.org/mos-algorithm-query-square-root-decomposition-set-1-introduction/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m27", "topic": "Strings", "q": "Valid Palindrome", "link": "https://leetcode.com/problems/valid-palindrome/", "companies": "Amazon Cisco D-E-Shaw Facebook FactSet Morgan Stanley Paytm Zoho", "note": null, "bonus": false}, {"id": "m28", "topic": "Strings", "q": "Valid Anagram", "link": "https://leetcode.com/problems/valid-anagram/", "companies": "Nagarro Media.net Directi Google Adobe Flipkart", "note": null, "bonus": false}, {"id": "m29", "topic": "Strings", "q": "Valid parentheses", "link": "https://leetcode.com/problems/valid-parentheses/", "companies": "Google Interview Qs", "note": "use Stacks (if possible)", "bonus": false}, {"id": "m30", "topic": "Strings", "q": "Remove Consecutive Characters", "link": "https://practice.geeksforgeeks.org/problems/consecutive-elements2306/1", "companies": "Samsung + Adobe", "note": null, "bonus": false}, {"id": "m31", "topic": "Strings", "q": "Longest Common Prefix", "link": "https://leetcode.com/problems/longest-common-prefix/", "companies": "Adobe + Grofers + Dunzo Interview Qs", "note": null, "bonus": false}, {"id": "m32", "topic": "Strings", "q": "Convert a Sentence into its Equivalent Mobile Numeric Keypad Sequence", "link": "https://www.geeksforgeeks.org/convert-sentence-equivalent-mobile-numeric-keypad-sequence/", "companies": "Adobe", "note": null, "bonus": false}, {"id": "m33", "topic": "Strings", "q": "Print all the Duplicates in the Input String", "link": "https://www.geeksforgeeks.org/print-all-the-duplicates-in-the-input-string/", "companies": "Ola + Amdocs IQ", "note": null, "bonus": false}, {"id": "m34", "topic": "Strings", "q": "Longest Substring without Repeating Characters", "link": "https://leetcode.com/problems/longest-substring-without-repeating-characters/", "companies": "Morgan Stanley + Amazon IQ", "note": null, "bonus": false}, {"id": "m35", "topic": "Strings", "q": "Longest Repeating Character Replacement", "link": "https://leetcode.com/problems/longest-repeating-character-replacement/", "companies": "Amazon Google", "note": null, "bonus": false}, {"id": "m36", "topic": "Strings", "q": "Group Anagrams", "link": "https://leetcode.com/problems/group-anagrams/", "companies": "Samsung + Adobe + Amazon Interview Qs", "note": null, "bonus": false}, {"id": "m37", "topic": "Strings", "q": "Longest Palindromic Substring", "link": "https://leetcode.com/problems/longest-palindromic-substring/", "companies": "Microsoft + Google + Samsung + Visa IQ", "note": null, "bonus": false}, {"id": "m38", "topic": "Strings", "q": "Palindromic Substrings", "link": "https://leetcode.com/problems/palindromic-substrings/", "companies": "Microsoft IQ", "note": null, "bonus": false}, {"id": "m39", "topic": "Strings", "q": "Next Permutation", "link": "https://practice.geeksforgeeks.org/problems/next-permutation5226/1", "companies": "Adobe + Goldman Sachs + Uber", "note": null, "bonus": false}, {"id": "m40", "topic": "Strings", "q": "Count Palindromic Subsequences", "link": "https://practice.geeksforgeeks.org/problems/count-palindromic-subsequences/1", "companies": "Myntra Interview Qs", "note": null, "bonus": false}, {"id": "m41", "topic": "Strings", "q": "Smallest Window in a String Containing all the Characters of Another String", "link": "https://practice.geeksforgeeks.org/problems/smallest-window-in-a-string-containing-all-the-characters-of-another-string-1587115621/1", "companies": "Microsoft + Amazon IQ", "note": null, "bonus": false}, {"id": "m42", "topic": "Strings", "q": "Wildcard String Matching", "link": "https://practice.geeksforgeeks.org/problems/wildcard-string-matching1126/1", "companies": "Microsoft + Amazon + Ola IQ", "note": null, "bonus": false}, {"id": "m43", "topic": "Strings", "q": "Longest Prefix Suffix", "link": "https://practice.geeksforgeeks.org/problems/longest-prefix-suffix2527/1", "companies": "Flipkart + Swiggy IQ", "note": null, "bonus": false}, {"id": "m44", "topic": "Strings", "q": "Rabin-Karp Algorithm for Pattern Searching", "link": "https://www.geeksforgeeks.org/rabin-karp-algorithm-for-pattern-searching/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m45", "topic": "Strings", "q": "Transform One String to Another using Minimum Number of Given Operation", "link": "https://www.geeksforgeeks.org/transform-one-string-to-another-using-minimum-number-of-given-operation/", "companies": "Directi", "note": null, "bonus": false}, {"id": "m46", "topic": "Strings", "q": "Minimum Window Substring", "link": "https://leetcode.com/problems/minimum-window-substring/", "companies": "Amazon Google MakeMyTrip Streamoid Technologies Microsoft Media.net Atlassian Flipkart", "note": null, "bonus": false}, {"id": "m47", "topic": "Strings", "q": "Boyer Moore Algorithm for Pattern Searching", "link": "https://www.geeksforgeeks.org/boyer-moore-algorithm-for-pattern-searching/", "companies": "Amdocs", "note": null, "bonus": false}, {"id": "m48", "topic": "Strings", "q": "Word Wrap", "link": "https://practice.geeksforgeeks.org/problems/word-wrap1646/1", "companies": "Microsoft", "note": "use Dynaming Programming", "bonus": false}, {"id": "m49", "topic": "2D Arrays", "q": "Zigzag (or diagonal) Traversal of Matrix", "link": "https://www.geeksforgeeks.org/zigzag-or-diagonal-traversal-of-matrix/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m50", "topic": "2D Arrays", "q": "Set Matrix Zeroes", "link": "https://leetcode.com/problems/set-matrix-zeroes/", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m51", "topic": "2D Arrays", "q": "Spiral Matrix", "link": "https://leetcode.com/problems/spiral-matrix/", "companies": "Flipkart + Apple + Societe Generale IQ", "note": null, "bonus": false}, {"id": "m52", "topic": "2D Arrays", "q": "Rotate Image", "link": "https://leetcode.com/problems/rotate-image/", "companies": "Microsoft Paytm Samsung Adobe", "note": null, "bonus": false}, {"id": "m53", "topic": "2D Arrays", "q": "Word Search", "link": "https://leetcode.com/problems/word-search/", "companies": "Google + Ola + Goldman Sachs IQ", "note": null, "bonus": false}, {"id": "m54", "topic": "2D Arrays", "q": "Find the Number of Islands | Set 1 (Using DFS)", "link": "https://www.geeksforgeeks.org/find-number-of-islands/", "companies": "Microsoft + Uber + Apple + Amazon IQ", "note": "Read about DFS", "bonus": false}, {"id": "m55", "topic": "2D Arrays", "q": "Given a Matrix of \u2018O\u2019 and \u2018X\u2019, Replace \u2018O\u2019 with \u2018X\u2019 if Surrounded by \u2018X\u2019", "link": "https://www.geeksforgeeks.org/given-matrix-o-x-replace-o-x-surrounded-x/", "companies": "Google", "note": null, "bonus": false}, {"id": "m56", "topic": "2D Arrays", "q": "Find a Common Element in all Rows of a Given Row-Wise Sorted Matrix", "link": "https://www.geeksforgeeks.org/find-common-element-rows-row-wise-sorted-matrix/", "companies": "MAQ Software Microsoft VMWare", "note": null, "bonus": false}, {"id": "m57", "topic": "2D Arrays", "q": "Create a Matrix with Alternating Rectangles of O and X", "link": "https://www.geeksforgeeks.org/create-a-matrix-with-alternating-rectangles-of-0-and-x/", "companies": "MAQ VMWare", "note": null, "bonus": false}, {"id": "m58", "topic": "2D Arrays", "q": "Maximum Size Rectangle of all 1s", "link": "https://www.geeksforgeeks.org/maximum-size-rectangle-binary-sub-matrix-1s/", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m59", "topic": "Searching & Sorting", "q": "Permute Two Arrays such that Sum of Every Pair is Greater or Equal to K", "link": "https://www.geeksforgeeks.org/permute-two-arrays-sum-every-pair-greater-equal-k/", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m60", "topic": "Searching & Sorting", "q": "counting sort", "link": "https://www.geeksforgeeks.org/counting-sort/", "companies": "Samsung+ Morgan Stanley+ Snapdeal + EPAM Systems", "note": null, "bonus": false}, {"id": "m61", "topic": "Searching & Sorting", "q": "find common elements three sorted arrays", "link": "https://www.geeksforgeeks.org/find-common-elements-three-sorted-arrays/", "companies": "MAQ Software Microsoft VMWare", "note": null, "bonus": false}, {"id": "m62", "topic": "Searching & Sorting", "q": "Searching in an array where adjacent differ by at most k", "link": "https://www.geeksforgeeks.org/searching-array-adjacent-differ-k/", "companies": "TCS Amazon", "note": null, "bonus": false}, {"id": "m63", "topic": "Searching & Sorting", "q": "ceiling in a sorted array", "link": "https://www.geeksforgeeks.org/ceiling-in-a-sorted-array/", "companies": "TCS", "note": null, "bonus": false}, {"id": "m64", "topic": "Searching & Sorting", "q": "Piar with given difference", "link": "https://www.geeksforgeeks.org/find-a-pair-with-the-given-difference/", "companies": "Amazon Visa", "note": null, "bonus": false}, {"id": "m65", "topic": "Searching & Sorting", "q": "majority element", "link": "https://www.geeksforgeeks.org/majority-element/", "companies": "Amazon+ Google", "note": null, "bonus": false}, {"id": "m66", "topic": "Searching & Sorting", "q": "count triplets with sum smaller that a given value", "link": "https://www.geeksforgeeks.org/count-triplets-with-sum-smaller-that-a-given-value/", "companies": "Amazon SAP Labs", "note": null, "bonus": false}, {"id": "m67", "topic": "Searching & Sorting", "q": "Maximum Sum Subsequence with no adjacent elements", "link": "https://www.geeksforgeeks.org/maximum-sum-such-that-no-two-elements-are-adjacent/", "companies": "Amazon FactSet Oxigen Wallet OYO Rooms Paytm Walmart Yahoo Adobe Flipkart", "note": null, "bonus": false}, {"id": "m68", "topic": "Searching & Sorting", "q": "Merge Sorted Arrays using O(1) Space", "link": "https://www.geeksforgeeks.org/merge-two-sorted-arrays-o1-extra-space/", "companies": "Amdocs Brocade Goldman Sachs Juniper Networks Linkedin Microsoft Quikr Snapdeal Synopsys Zoho Adobe", "note": null, "bonus": false}, {"id": "m69", "topic": "Searching & Sorting", "q": "Inversion of Array", "link": "https://practice.geeksforgeeks.org/problems/inversion-of-array-1587115620/1", "companies": "Adobe Amazon BankBazaar Flipkart Microsoft Myntra MakeMyTrip", "note": null, "bonus": false}, {"id": "m70", "topic": "Searching & Sorting", "q": "Find Duplicates in O(n) Time and O(1) Extra Space", "link": "https://www.geeksforgeeks.org/find-duplicates-in-on-time-and-constant-extra-space/", "companies": "Amazon D-E-Shaw Flipkart Paytm Qualcomm Zoho", "note": null, "bonus": false}, {"id": "m71", "topic": "Searching & Sorting", "q": "Radix Sort", "link": "https://www.geeksforgeeks.org/radix-sort/", "companies": "Amazon+ Microsoft", "note": null, "bonus": false}, {"id": "m72", "topic": "Searching & Sorting", "q": "Product of Array except itself", "link": "https://www.geeksforgeeks.org/a-product-array-puzzle/", "companies": "Accolite Amazon D-E-Shaw Intuit Morgan Stanley Opera Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m73", "topic": "Searching & Sorting", "q": "Make all Array Elements Equal", "link": "https://www.geeksforgeeks.org/make-array-elements-equal-minimum-cost/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m74", "topic": "Searching & Sorting", "q": "Check if Reversing a Sub Array Make the Array Sorted", "link": "https://www.geeksforgeeks.org/check-reversing-sub-array-make-array-sorted/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m75", "topic": "Searching & Sorting", "q": "Find Four Elements that Sum to a Given Value", "link": "https://www.geeksforgeeks.org/find-four-elements-that-sum-to-a-given-value-set-2/", "companies": "Adobe Amazon Google Microsoft OYO Rooms", "note": null, "bonus": false}, {"id": "m76", "topic": "Searching & Sorting", "q": "Median of Two Sorted Array with Different Size", "link": "https://www.geeksforgeeks.org/median-of-two-sorted-arrays-of-different-sizes/", "companies": "Amazon Samsung Microsoft Google", "note": null, "bonus": false}, {"id": "m77", "topic": "Searching & Sorting", "q": "Median of Stream of Integers Running Integers", "link": "https://www.geeksforgeeks.org/median-of-stream-of-integers-running-integers/", "companies": "Amazon + Google", "note": null, "bonus": false}, {"id": "m78", "topic": "Searching & Sorting", "q": "Print Subarrays with 0 Sum", "link": "https://www.geeksforgeeks.org/print-all-subarrays-with-0-sum/", "companies": "Paytm Adobe", "note": null, "bonus": false}, {"id": "m79", "topic": "Searching & Sorting", "q": "Aggressive Cows", "link": "https://www.spoj.com/problems/AGGRCOW/", "companies": "Adobe", "note": null, "bonus": false}, {"id": "m80", "topic": "Searching & Sorting", "q": "Allocate Minimum number of Pages", "link": "https://practice.geeksforgeeks.org/problems/allocate-minimum-number-of-pages0937/1", "companies": "Google Infosys Codenation Amazon Microsoft", "note": null, "bonus": false}, {"id": "m81", "topic": "Searching & Sorting", "q": "Minimum Swaps to Sort", "link": "https://www.geeksforgeeks.org/minimum-number-swaps-required-sort-array/", "companies": "Amazon + Google", "note": null, "bonus": false}, {"id": "m82", "topic": "Backtracking", "q": "Backtracking Set 2 Rat in a Maze", "link": "https://www.geeksforgeeks.org/backttracking-set-2-rat-in-a-maze/", "companies": "Microsoft Amazon", "note": null, "bonus": false}, {"id": "m83", "topic": "Backtracking", "q": "Combinational Sum", "link": "https://www.geeksforgeeks.org/combinational-sum/", "companies": "Adobe Amazon Microsoft", "note": null, "bonus": false}, {"id": "m84", "topic": "Backtracking", "q": "Crossword-Puzzle", "link": "https://www.hackerrank.com/challenges/crossword-puzzle/problem", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m85", "topic": "Backtracking", "q": "Longest Possible Route in a Matrix with Hurdles", "link": "https://www.geeksforgeeks.org/longest-possible-route-in-a-matrix-with-hurdles/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m86", "topic": "Backtracking", "q": "Printing all solutions in N-Queen Problem", "link": "https://www.geeksforgeeks.org/printing-solutions-n-queen-problem/", "companies": "Accolite Amazon Amdocs D-E-Shaw MAQ Software Twitter Visa Microsoft", "note": null, "bonus": false}, {"id": "m87", "topic": "Backtracking", "q": "Solve the Sudoku", "link": "https://practice.geeksforgeeks.org/problems/solve-the-sudoku-1587115621/1", "companies": "Amazon Directi Flipkart MakeMyTrip MAQ Software Microsoft Ola Cabs Oracle PayPal Zoho", "note": null, "bonus": false}, {"id": "m88", "topic": "Backtracking", "q": "Partition Equal Subset Sum", "link": "https://practice.geeksforgeeks.org/problems/subset-sum-problem2014/1", "companies": "Amazon + Adobe + Accolite + Traveloka", "note": null, "bonus": false}, {"id": "m89", "topic": "Backtracking", "q": "M Coloring Problem", "link": "https://practice.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m90", "topic": "Backtracking", "q": "Knight Tour", "link": "https://www.geeksforgeeks.org/backtracking-set-1-the-knights-tour-problem/", "companies": "IBM", "note": null, "bonus": false}, {"id": "m91", "topic": "Backtracking", "q": "Soduko", "link": "https://www.geeksforgeeks.org/backtracking-set-7-suduku/", "companies": "Amazon + Adobe + Accolite + Traveloka", "note": null, "bonus": false}, {"id": "m92", "topic": "Backtracking", "q": "Remove Invalid Parentheses", "link": "https://www.geeksforgeeks.org/remove-invalid-parentheses/", "companies": "Uber", "note": null, "bonus": false}, {"id": "m93", "topic": "Backtracking", "q": "Word Break Problem using Backtracking", "link": "https://www.geeksforgeeks.org/word-break-problem-using-backtracking/", "companies": null, "note": null, "bonus": false}, {"id": "m94", "topic": "Backtracking", "q": "Print all Palindromic Partitions of a String", "link": "https://www.geeksforgeeks.org/print-palindromic-partitions-string/", "companies": "Facebook Amazon Microsoft", "note": null, "bonus": false}, {"id": "m95", "topic": "Backtracking", "q": "Find Shortest Safe Route in a Path with Landmines", "link": "https://www.geeksforgeeks.org/find-shortest-safe-route-in-a-path-with-landmines/", "companies": "Facebook Amazon Microsoft", "note": null, "bonus": false}, {"id": "m96", "topic": "Backtracking", "q": "Partition of Set into K Subsets with Equal Sum", "link": "https://www.geeksforgeeks.org/partition-set-k-subsets-equal-sum/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m97", "topic": "Backtracking", "q": "Backtracking set-7 hamiltonian cycle", "link": "https://www.geeksforgeeks.org/backtracking-set-7-hamiltonian-cycle/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m98", "topic": "Backtracking", "q": "tug-of-war", "link": "https://www.geeksforgeeks.org/tug-of-war/", "companies": "Google", "note": null, "bonus": false}, {"id": "m99", "topic": "Backtracking", "q": "Maximum Possible Number by doing at most K swaps", "link": "https://www.geeksforgeeks.org/find-maximum-number-possible-by-doing-at-most-k-swaps/", "companies": "Amazon + Adobe + Accolite + Traveloka", "note": null, "bonus": false}, {"id": "m100", "topic": "Backtracking", "q": "Backtracking set-8 solving cryptarithmetic puzzles", "link": "https://www.geeksforgeeks.org/backtracking-set-8-solving-cryptarithmetic-puzzles/", "companies": "Goldman Sachs", "note": null, "bonus": false}, {"id": "m101", "topic": "Backtracking", "q": "Find paths from corner cell to middle cell in maze", "link": "https://www.geeksforgeeks.org/find-paths-from-corner-cell-to-middle-cell-in-maze/", "companies": "Meta", "note": null, "bonus": false}, {"id": "m102", "topic": "Backtracking", "q": "Arithmetic Expressions", "link": "https://www.hackerrank.com/challenges/arithmetic-expressions/problem", "companies": "Flipkart", "note": null, "bonus": false}, {"id": "m103", "topic": "Linked List", "q": "Reverse Linked List", "link": "https://leetcode.com/problems/reverse-linked-list/", "companies": "Sprinklr", "note": null, "bonus": false}, {"id": "m104", "topic": "Linked List", "q": "Linked List Cycle", "link": "https://leetcode.com/problems/linked-list-cycle/", "companies": "Accolite Amazon D-E-Shaw Hike Lybrate Mahindra Comviva MakeMyTrip MAQ Software OYO Rooms Paytm Qualcomm Samsung SAP Labs Snapdeal Veritas VMWare Walmart Adobe", "note": null, "bonus": false}, {"id": "m105", "topic": "Linked List", "q": "Merge Two Sorted Lists", "link": "https://leetcode.com/problems/merge-two-sorted-lists/", "companies": "Accolite Amazon Belzabar Brocade FactSet Flipkart MakeMyTrip Microsoft OATS Systems Oracle Samsung Synopsys Zoho", "note": null, "bonus": false}, {"id": "m106", "topic": "Linked List", "q": "Delete without Head node", "link": "https://www.geeksforgeeks.org/given-only-a-pointer-to-a-node-to-be-deleted-in-a-singly-linked-list-how-do-you-delete-it/", "companies": "Amazon Goldman Sachs Kritikal Solutions Microsoft Samsung Visa", "note": null, "bonus": false}, {"id": "m107", "topic": "Linked List", "q": "Remove duplicates from an unsorted linked list", "link": "https://www.geeksforgeeks.org/remove-duplicates-from-an-unsorted-linked-list/", "companies": "Amazon Intuit", "note": null, "bonus": false}, {"id": "m108", "topic": "Linked List", "q": "Sort a linked list of 0s-1s-or-2s", "link": "https://www.geeksforgeeks.org/sort-a-linked-list-of-0s-1s-or-2s/", "companies": "Microsoft Amazon MakeMyTrip", "note": null, "bonus": false}, {"id": "m109", "topic": "Linked List", "q": "Multiply two numbers represented linked lists", "link": "https://www.geeksforgeeks.org/multiply-two-numbers-represented-linked-lists/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m110", "topic": "Linked List", "q": "Remove nth node from end of list", "link": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/", "companies": "Accolite Adobe Amazon Citicorp Epic Systems FactSet Hike MAQ Software Monotype Solutions Morgan Stanley OYO Rooms Qualcomm Samsung Snapdeal Flipkart", "note": null, "bonus": false}, {"id": "m111", "topic": "Linked List", "q": "Reorder List", "link": "https://leetcode.com/problems/reorder-list/", "companies": "Amazon Microsoft OYO Rooms Intuit", "note": null, "bonus": false}, {"id": "m112", "topic": "Linked List", "q": "Detect and remove loop in a linked list", "link": "https://www.geeksforgeeks.org/detect-and-remove-loop-in-a-linked-list/", "companies": "Accolite Amazon D-E-Shaw Hike Lybrate Mahindra Comviva MakeMyTrip MAQ Software OYO Rooms Paytm Qualcomm Samsung SAP Labs Snapdeal Veritas VMWare Walmart Adobe", "note": null, "bonus": false}, {"id": "m113", "topic": "Linked List", "q": "Write a Function to get the Intersection Point of two Linked Lists", "link": "https://www.geeksforgeeks.org/write-a-function-to-get-the-intersection-point-of-two-linked-lists/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m114", "topic": "Linked List", "q": "Flatten a linked list with next and child pointers", "link": "https://www.geeksforgeeks.org/flatten-a-linked-list-with-next-and-child-pointers/", "companies": "Google", "note": null, "bonus": false}, {"id": "m115", "topic": "Linked List", "q": "Linked list in zig-zag fashion", "link": "https://www.geeksforgeeks.org/linked-list-in-zig-zag-fashion/", "companies": "Micorsoft", "note": null, "bonus": false}, {"id": "m116", "topic": "Linked List", "q": "Reverse a doubly linked list", "link": "https://practice.geeksforgeeks.org/problems/reverse-a-doubly-linked-list/1", "companies": "Walmart", "note": null, "bonus": false}, {"id": "m117", "topic": "Linked List", "q": "Delete nodes which have a greater value on right side", "link": "https://www.geeksforgeeks.org/delete-nodes-which-have-a-greater-value-on-right-side/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m118", "topic": "Linked List", "q": "Segregate even and odd Elements in a Linked List", "link": "https://www.geeksforgeeks.org/segregate-even-and-odd-elements-in-a-linked-list/", "companies": "Walmart", "note": null, "bonus": false}, {"id": "m119", "topic": "Linked List", "q": "Point to next higher value node in a linked list with an Arbitrary Pointer", "link": "https://www.geeksforgeeks.org/point-to-next-higher-value-node-in-a-linked-list-with-an-arbitrary-pointer/", "companies": "GeekyAnts", "note": null, "bonus": false}, {"id": "m120", "topic": "Linked List", "q": "Rearrange a given linked list in place", "link": "https://www.geeksforgeeks.org/rearrange-a-given-linked-list-in-place/", "companies": "Ola Uber", "note": null, "bonus": false}, {"id": "m121", "topic": "Linked List", "q": "Sort Biotonic Doubly Linked Lists", "link": "https://www.geeksforgeeks.org/sort-biotonic-doubly-linked-list/", "companies": "Morgan Stanley", "note": null, "bonus": false}, {"id": "m122", "topic": "Linked List", "q": "Merge K Sorted Lists", "link": "https://leetcode.com/problems/merge-k-sorted-lists/", "companies": "Microsoft+ Ola+ eBay", "note": null, "bonus": false}, {"id": "m123", "topic": "Linked List", "q": "Merge sort for linked list", "link": "https://www.geeksforgeeks.org/merge-sort-for-linked-list/", "companies": "Accolite Adobe Amazon MAQ Software Microsoft Paytm Veritas", "note": "Important", "bonus": false}, {"id": "m124", "topic": "Linked List", "q": "Quicksort on singly-linked list", "link": "https://www.geeksforgeeks.org/quicksort-on-singly-linked-list/", "companies": "Paytm", "note": "Important", "bonus": false}, {"id": "m125", "topic": "Linked List", "q": "Sum of two linked lists", "link": "https://www.geeksforgeeks.org/sum-of-two-linked-lists/", "companies": "Accolite Amazon Flipkart MakeMyTrip Microsoft Morgan Stanley Qualcomm Snapdeal", "note": null, "bonus": false}, {"id": "m126", "topic": "Linked List", "q": "Flattening a linked list", "link": "https://www.geeksforgeeks.org/flattening-a-linked-list/", "companies": "24*7 Innovation Labs Amazon Drishti-Soft Flipkart Goldman Sachs Microsoft Paytm Payu Qualcomm Snapdeal Visa", "note": null, "bonus": false}, {"id": "m127", "topic": "Linked List", "q": "Clone a linked list with next and random Pointer", "link": "https://www.geeksforgeeks.org/a-linked-list-with-next-and-arbit-pointer/", "companies": "Triology", "note": null, "bonus": false}, {"id": "m128", "topic": "Linked List", "q": "Subtract two numbers represented as linked lists", "link": "https://www.geeksforgeeks.org/subtract-two-numbers-represented-as-linked-lists/", "companies": "Amazon Goldman Sachs", "note": null, "bonus": false}, {"id": "m130", "topic": "Stacks & Queues", "q": "Implement two stacks in an Array", "link": "https://www.geeksforgeeks.org/implement-two-stacks-in-an-array/", "companies": "24*7 Innovation Labs Microsoft Samsung Snapdeal", "note": null, "bonus": false}, {"id": "m131", "topic": "Stacks & Queues", "q": "Evaluation of Postfix Expression", "link": "https://www.geeksforgeeks.org/stack-set-4-evaluation-postfix-expression/", "companies": "Amazon + Google + Facebook", "note": null, "bonus": false}, {"id": "m132", "topic": "Stacks & Queues", "q": "Implement Stack using Queues", "link": "https://leetcode.com/problems/implement-stack-using-queues/", "companies": "Facebook", "note": null, "bonus": false}, {"id": "m133", "topic": "Stacks & Queues", "q": "Queue Reversal", "link": "https://practice.geeksforgeeks.org/problems/queue-reversal/1", "companies": "Amazon + Morgain Stanley", "note": null, "bonus": false}, {"id": "m134", "topic": "Stacks & Queues", "q": "Implement Stack Queue using Deque", "link": "https://www.geeksforgeeks.org/implement-stack-queue-using-deque/", "companies": "Microsoft +Atlassian", "note": null, "bonus": false}, {"id": "m135", "topic": "Stacks & Queues", "q": "Reverse first k elements of queue", "link": "https://practice.geeksforgeeks.org/problems/reverse-first-k-elements-of-queue/1", "companies": "Microsoft + Amdocs", "note": null, "bonus": false}, {"id": "m136", "topic": "Stacks & Queues", "q": "Design Stack with Middle Operation", "link": "https://www.geeksforgeeks.org/design-a-stack-with-find-middle-operation/", "companies": "MaQ Software", "note": null, "bonus": false}, {"id": "m137", "topic": "Stacks & Queues", "q": "Infix to Postfix", "link": "https://www.geeksforgeeks.org/stack-set-2-infix-to-postfix/", "companies": "Amazon + Samsung + Paytm + Vmware inc", "note": null, "bonus": false}, {"id": "m138", "topic": "Stacks & Queues", "q": "Design and Implement Special stack", "link": "https://www.geeksforgeeks.org/design-and-implement-special-stack-data-structure/", "companies": "Amazon Google Microsoft Visa Goldman Sachs", "note": null, "bonus": false}, {"id": "m139", "topic": "Stacks & Queues", "q": "Longest Valid String", "link": "https://www.geeksforgeeks.org/length-of-the-longest-valid-substring/", "companies": "Google Microsoft", "note": null, "bonus": false}, {"id": "m140", "topic": "Stacks & Queues", "q": "Find if an expression has duplicate parenthesis or not", "link": "https://www.geeksforgeeks.org/find-expression-duplicate-parenthesis-not/", "companies": "Flipkart Oracle OYO Rooms Snapdeal Walmart Yatra.com Microsoft Google", "note": null, "bonus": false}, {"id": "m141", "topic": "Stacks & Queues", "q": "Stack permutations check if an array is stack permutation of other", "link": "https://www.geeksforgeeks.org/stack-permutations-check-if-an-array-is-stack-permutation-of-other/", "companies": "Visa", "note": null, "bonus": false}, {"id": "m142", "topic": "Stacks & Queues", "q": "Count natural numbers whose permutation greater number", "link": "https://www.geeksforgeeks.org/count-natural-numbers-whose-permutation-greater-number/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m143", "topic": "Stacks & Queues", "q": "Sort a stack using Recursion", "link": "https://www.geeksforgeeks.org/sort-a-stack-using-recursion/", "companies": "Amazon Goldman Sachs IBM Intuit Kuliza Yahoo Microsoft", "note": null, "bonus": false}, {"id": "m144", "topic": "Stacks & Queues", "q": "Queue based approach for first non repeating character in a stream", "link": "https://www.geeksforgeeks.org/queue-based-approach-for-first-non-repeating-character-in-a-stream/", "companies": "Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m145", "topic": "Stacks & Queues", "q": "The Celebrity Problem", "link": "https://practice.geeksforgeeks.org/problems/the-celebrity-problem/1", "companies": "Google + Visa + Apple", "note": null, "bonus": false}, {"id": "m146", "topic": "Stacks & Queues", "q": "Next larger Element", "link": "https://practice.geeksforgeeks.org/problems/next-larger-element-1587115620/1", "companies": "Visa", "note": null, "bonus": false}, {"id": "m147", "topic": "Stacks & Queues", "q": "Distance of nearest cell", "link": "https://practice.geeksforgeeks.org/problems/distance-of-nearest-cell-having-1-1587115620/1", "companies": "Flipkar + Facebook", "note": null, "bonus": false}, {"id": "m148", "topic": "Stacks & Queues", "q": "Rotten-oranges", "link": "https://practice.geeksforgeeks.org/problems/rotten-oranges2536/1", "companies": "Facebook", "note": null, "bonus": false}, {"id": "m149", "topic": "Stacks & Queues", "q": "Next smaller element", "link": "https://www.geeksforgeeks.org/next-smaller-element/", "companies": "Codenation", "note": null, "bonus": false}, {"id": "m150", "topic": "Stacks & Queues", "q": "Circular-tour", "link": "https://practice.geeksforgeeks.org/problems/circular-tour/1", "companies": "Codenation Flipkart", "note": null, "bonus": false}, {"id": "m151", "topic": "Stacks & Queues", "q": "Efficiently implement k-stacks single array", "link": "https://www.geeksforgeeks.org/efficiently-implement-k-stacks-single-array/", "companies": "Flipkart", "note": null, "bonus": false}, {"id": "m152", "topic": "Stacks & Queues", "q": "The celebrity problem", "link": "http://geeksforgeeks.org/the-celebrity-problem/", "companies": "Google + Visa + Apple", "note": null, "bonus": false}, {"id": "m153", "topic": "Stacks & Queues", "q": "Iterative tower of hanoi", "link": "https://www.geeksforgeeks.org/iterative-tower-of-hanoi/", "companies": "Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m154", "topic": "Stacks & Queues", "q": "Find the maximum of minimums for every window size in a given array", "link": "https://www.geeksforgeeks.org/find-the-maximum-of-minimums-for-every-window-size-in-a-given-array/", "companies": "Amazon Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m155", "topic": "Stacks & Queues", "q": "lru cache implementation", "link": "https://www.geeksforgeeks.org/lru-cache-implementation/", "companies": "Microsoft + Uber + Alibaba", "note": null, "bonus": false}, {"id": "m156", "topic": "Stacks & Queues", "q": "Find a tour that visits all stations", "link": "https://www.geeksforgeeks.org/find-a-tour-that-visits-all-stations/", "companies": "Uber", "note": null, "bonus": false}, {"id": "m157", "topic": "Greedy", "q": "Activity selection problem greedy algo", "link": "https://www.geeksforgeeks.org/activity-selection-problem-greedy-algo-1/", "companies": "Facebook Morgan Stanley Flipkart", "note": null, "bonus": false}, {"id": "m158", "topic": "Greedy", "q": "Greedy algorithm to find minimum number of coins", "link": "https://www.geeksforgeeks.org/greedy-algorithm-to-find-minimum-number-of-coins/", "companies": "Accolite Amazon Morgan Stanley Oracle Paytm Samsung Snapdeal Synopsys Visa Microsoft Google", "note": null, "bonus": false}, {"id": "m159", "topic": "Greedy", "q": "Minimum sum two numbers formed digits array-2", "link": "https://www.geeksforgeeks.org/minimum-sum-two-numbers-formed-digits-array-2/", "companies": "Google", "note": null, "bonus": false}, {"id": "m160", "topic": "Greedy", "q": "Minimum sum absolute difference pairs two arrays", "link": "https://www.geeksforgeeks.org/minimum-sum-absolute-difference-pairs-two-arrays/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m161", "topic": "Greedy", "q": "Find maximum height pyramid from the given array of objects", "link": "https://www.geeksforgeeks.org/find-maximum-height-pyramid-from-the-given-array-of-objects/", "companies": "Flipkart Amazon", "note": null, "bonus": false}, {"id": "m162", "topic": "Greedy", "q": "Minimum cost for acquiring all coins with k extra coins allowed with every coin", "link": "https://www.geeksforgeeks.org/minimum-cost-for-acquiring-all-coins-with-k-extra-coins-allowed-with-every-coin/", "companies": null, "note": null, "bonus": false}, {"id": "m163", "topic": "Greedy", "q": "Find maximum equal sum of every three stacks", "link": "http://geeksforgeeks.org/find-maximum-sum-possible-equal-sum-three-stacks/", "companies": "Microsoft Amazon Flipkart", "note": null, "bonus": false}, {"id": "m164", "topic": "Greedy", "q": "Job sequencing problem", "link": "https://www.geeksforgeeks.org/job-sequencing-problem/", "companies": "Microsoft + Acolite", "note": null, "bonus": false}, {"id": "m165", "topic": "Greedy", "q": "Greedy algorithm egyptian fraction", "link": "https://www.geeksforgeeks.org/greedy-algorithm-egyptian-fraction/", "companies": null, "note": null, "bonus": false}, {"id": "m166", "topic": "Greedy", "q": "Fractional knapsack problem", "link": "https://www.geeksforgeeks.org/fractional-knapsack-problem/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m167", "topic": "Greedy", "q": "Maximum length chain of pairs", "link": "https://www.geeksforgeeks.org/maximum-length-chain-of-pairs-dp-20/", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m168", "topic": "Greedy", "q": "Find smallest number with given number of digits and digit sum", "link": "https://www.geeksforgeeks.org/find-smallest-number-with-given-number-of-digits-and-digit-sum/", "companies": "MAQ Software OYO Rooms", "note": null, "bonus": false}, {"id": "m169", "topic": "Greedy", "q": "Maximize sum of consecutive differences circular-array", "link": "https://www.geeksforgeeks.org/maximize-sum-consecutive-differences-circular-array/", "companies": "Maccafe", "note": null, "bonus": false}, {"id": "m170", "topic": "Greedy", "q": "paper-cut minimum number squares", "link": "https://www.geeksforgeeks.org/paper-cut-minimum-number-squares/", "companies": "Google", "note": null, "bonus": false}, {"id": "m171", "topic": "Greedy", "q": "Lexicographically smallest array-k consecutive swaps", "link": "http://geeksforgeeks.org/lexicographically-smallest-array-k-consecutive-swaps/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m172", "topic": "Greedy", "q": "Problems-CHOCOLA", "link": "https://www.spoj.com/problems/CHOCOLA/", "companies": "Flipkart", "note": null, "bonus": false}, {"id": "m173", "topic": "Greedy", "q": "Find minimum time to finish all jobs with given constraints", "link": "https://www.geeksforgeeks.org/find-minimum-time-to-finish-all-jobs-with-given-constraints/", "companies": null, "note": null, "bonus": false}, {"id": "m174", "topic": "Greedy", "q": "Job sequencing using disjoint set union", "link": "https://www.geeksforgeeks.org/job-sequencing-using-disjoint-set-union/", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m175", "topic": "Greedy", "q": "Rearrange characters string such that no two adjacent are same", "link": "https://www.geeksforgeeks.org/rearrange-characters-string-no-two-adjacent/", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m176", "topic": "Greedy", "q": "Minimum edges to reverse to make path from a source to a destination", "link": "https://www.geeksforgeeks.org/minimum-edges-reverse-make-path-source-destination/", "companies": null, "note": null, "bonus": false}, {"id": "m177", "topic": "Greedy", "q": "Minimize Cash Flow among a given set of friends who have borrowed money from each other", "link": "https://www.geeksforgeeks.org/minimize-cash-flow-among-given-set-friends-borrowed-money/", "companies": null, "note": null, "bonus": false}, {"id": "m178", "topic": "Greedy", "q": "Minimum Cost to cut a board into squares", "link": "https://www.geeksforgeeks.org/minimum-cost-cut-board-squares/", "companies": "Maccafe", "note": null, "bonus": false}, {"id": "m179", "topic": "Binary Trees", "q": "Maximum Depth of Binary Tree", "link": "https://leetcode.com/problems/maximum-depth-of-binary-tree/", "companies": "Amazon Cadence India CouponDunia D-E-Shaw FactSet FreeCharge MakeMyTrip", "note": null, "bonus": false}, {"id": "m180", "topic": "Binary Trees", "q": "Reverse Level Order Traversal", "link": "https://practice.geeksforgeeks.org/problems/reverse-level-order-traversal/1", "companies": "Amazon + Microsoft + flipkart + Adobe", "note": null, "bonus": false}, {"id": "m181", "topic": "Binary Trees", "q": "Subtree of Another Tree", "link": "https://leetcode.com/problems/subtree-of-another-tree/", "companies": "Amazon + Microsoft + Facebook", "note": null, "bonus": false}, {"id": "m182", "topic": "Binary Trees", "q": "Invert Binary Tree", "link": "https://leetcode.com/problems/invert-binary-tree/", "companies": "Amazon Hike", "note": null, "bonus": false}, {"id": "m183", "topic": "Binary Trees", "q": "Binary Tree Level Order Traversal", "link": "https://leetcode.com/problems/binary-tree-level-order-traversal/", "companies": "Accolite Adobe Amazon Cisco D-E-Shaw Flipkart", "note": null, "bonus": false}, {"id": "m184", "topic": "Binary Trees", "q": "Left View of Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/left-view-of-binary-tree/1", "companies": "Microsoft + Adobe + Cisco Networking Academy", "note": null, "bonus": false}, {"id": "m185", "topic": "Binary Trees", "q": "Right View of Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/right-view-of-binary-tree/1", "companies": "Amdocs", "note": null, "bonus": false}, {"id": "m186", "topic": "Binary Trees", "q": "ZigZag Tree Traversal", "link": "https://practice.geeksforgeeks.org/problems/zigzag-tree-traversal/1", "companies": "Amazon Cisco FactSet Hike Snapdeal Walmart Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m187", "topic": "Binary Trees", "q": "Create a mirror tree from the given binary tree", "link": "https://www.geeksforgeeks.org/create-a-mirror-tree-from-the-given-binary-tree/", "companies": "Accolite Adobe Amazon Belzabar EBay Goldman Sachs Microsoft Morgan Stanley Myntra Ola Cabs Paytm", "note": null, "bonus": false}, {"id": "m188", "topic": "Binary Trees", "q": "Leaf at same level", "link": "https://practice.geeksforgeeks.org/problems/leaf-at-same-level/1", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m189", "topic": "Binary Trees", "q": "Check for Balanced Tree", "link": "https://practice.geeksforgeeks.org/problems/check-for-balanced-tree/1", "companies": "Amazon Walmart Microsoft", "note": null, "bonus": false}, {"id": "m190", "topic": "Binary Trees", "q": "Transform to Sum Tree", "link": "https://practice.geeksforgeeks.org/problems/transform-to-sum-tree/1", "companies": "Amazon FactSet Microsoft Samsung Walmart", "note": null, "bonus": false}, {"id": "m191", "topic": "Binary Trees", "q": "Check if Tree is Isomorphic", "link": "https://practice.geeksforgeeks.org/problems/check-if-tree-is-isomorphic/1", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m192", "topic": "Binary Trees", "q": "Same Tree", "link": "https://leetcode.com/problems/same-tree/", "companies": "Amazon Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m193", "topic": "Binary Trees", "q": "Construct Binary Tree from Preorder and Inorder Traversal", "link": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/", "companies": "Accolite Amazon Microsoft", "note": null, "bonus": false}, {"id": "m194", "topic": "Binary Trees", "q": "Height of Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/height-of-binary-tree/1", "companies": "Amazon Cadence India CouponDunia D-E-Shaw FactSet FreeCharge MakeMyTrip", "note": null, "bonus": false}, {"id": "m195", "topic": "Binary Trees", "q": "Diameter of a Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/diameter-of-binary-tree/1", "companies": "Amazon Microsoft OYO Rooms", "note": null, "bonus": false}, {"id": "m196", "topic": "Binary Trees", "q": "Top View of Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/top-view-of-binary-tree/1", "companies": "Microsoft + Adobe + Expedia Group", "note": null, "bonus": false}, {"id": "m197", "topic": "Binary Trees", "q": "Bottom View of Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/bottom-view-of-binary-tree/1", "companies": "DE Shaw India", "note": null, "bonus": false}, {"id": "m198", "topic": "Binary Trees", "q": "Diagonal Traversal of Binary Tree", "link": "https://www.geeksforgeeks.org/diagonal-traversal-of-binary-tree/", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m199", "topic": "Binary Trees", "q": "Boundary Traversal of binary tree", "link": "https://practice.geeksforgeeks.org/problems/boundary-traversal-of-binary-tree/1", "companies": "Accolite Amazon FactSet Hike Kritikal Solutions", "note": null, "bonus": false}, {"id": "m200", "topic": "Binary Trees", "q": "Construct Binary Tree from String with Brackets", "link": "https://www.geeksforgeeks.org/construct-binary-tree-string-bracket-representation/", "companies": "Microsoft Morgan Stanley OYO Rooms Payu Samsung Snapdeal Flipkart", "note": null, "bonus": false}, {"id": "m201", "topic": "Binary Trees", "q": "Minimum swap required to convert binary tree to binary search tree", "link": "https://www.geeksforgeeks.org/minimum-swap-required-convert-binary-tree-binary-search-tree/", "companies": "Adobe Amazon", "note": null, "bonus": false}, {"id": "m202", "topic": "Binary Trees", "q": "Duplicate subtree in Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/duplicate-subtree-in-binary-tree/1", "companies": "Google", "note": null, "bonus": false}, {"id": "m203", "topic": "Binary Trees", "q": "Check if a given graph is tree or not", "link": "https://www.geeksforgeeks.org/check-given-graph-tree/", "companies": "Microsoft Amazon", "note": null, "bonus": false}, {"id": "m204", "topic": "Binary Trees", "q": "Lowest Common Ancestor in a Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/lowest-common-ancestor-in-a-binary-tree/1", "companies": "Accolite Amazon American Express Cisco Expedia Flipkart MakeMyTrip Microsoft OYO Room", "note": null, "bonus": false}, {"id": "m205", "topic": "Binary Trees", "q": "Min distance between two given nodes of a Binary Tree", "link": "https://practice.geeksforgeeks.org/problems/min-distance-between-two-given-nodes-of-a-binary-tree/1", "companies": "Amazon Linkedin MakeMyTrip Ola Cabs Qualcomm Samsung", "note": null, "bonus": false}, {"id": "m206", "topic": "Binary Trees", "q": "Duplicate Subtrees", "link": "https://practice.geeksforgeeks.org/problems/duplicate-subtrees/1", "companies": "Ola", "note": null, "bonus": false}, {"id": "m207", "topic": "Binary Trees", "q": "Kth ancestor of a node in binary tree", "link": "https://www.geeksforgeeks.org/kth-ancestor-node-binary-tree-set-2/", "companies": "Josh Technology Group", "note": null, "bonus": false}, {"id": "m208", "topic": "Binary Trees", "q": "Binary Tree Maximum Path Sum", "link": "https://leetcode.com/problems/binary-tree-maximum-path-sum/", "companies": "Samsung + Facebook", "note": null, "bonus": false}, {"id": "m209", "topic": "Binary Trees", "q": "Serialize and Deserialize Binary Tree", "link": "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/", "companies": "Flipkart InMobi Linkedin MAQ Software Microsoft Paytm Quikr Yahoo", "note": null, "bonus": false}, {"id": "m210", "topic": "Binary Trees", "q": "Binary Tree to DLL", "link": "https://practice.geeksforgeeks.org/problems/binary-tree-to-dll/1", "companies": "Accolite Amazon Goldman Sachs Microsoft Morgan Stanley Salesforce Snapdeal", "note": null, "bonus": false}, {"id": "m211", "topic": "Binary Trees", "q": "Print all k-sum paths in a binary tree", "link": "https://www.geeksforgeeks.org/print-k-sum-paths-binary-tree/", "companies": "Accolite Amazon Goldman Sachs", "note": null, "bonus": false}, {"id": "m212", "topic": "Binary Search Trees", "q": "Lowest Common Ancestor of a Binary Search Tree", "link": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/", "companies": "Accolite Amazon Flipkart MAQ Software Microsoft Samsung Synopsys", "note": null, "bonus": false}, {"id": "m213", "topic": "Binary Search Trees", "q": "Binary Search Tree | Set 1 (Search and Insertion)", "link": "https://www.geeksforgeeks.org/binary-search-tree-set-1-search-and-insertion/", "companies": "Accolite Amazon Microsoft Paytm Samsung", "note": null, "bonus": false}, {"id": "m214", "topic": "Binary Search Trees", "q": "Minimum element in BST", "link": "https://practice.geeksforgeeks.org/problems/minimum-element-in-bst/1", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m215", "topic": "Binary Search Trees", "q": "Predecessor and Successor", "link": "https://practice.geeksforgeeks.org/problems/predecessor-and-successor/1", "companies": "Google + Adobe + Goladman Sachs + Direct", "note": null, "bonus": false}, {"id": "m216", "topic": "Binary Search Trees", "q": "Check whether BST contains Dead End", "link": "https://practice.geeksforgeeks.org/problems/check-whether-bst-contains-dead-end/1", "companies": "Walmart", "note": null, "bonus": false}, {"id": "m217", "topic": "Binary Search Trees", "q": "Binary Tree to BST", "link": "https://practice.geeksforgeeks.org/problems/binary-tree-to-bst/1", "companies": "HSBC", "note": null, "bonus": false}, {"id": "m218", "topic": "Binary Search Trees", "q": "Kth largest element in BST", "link": "https://practice.geeksforgeeks.org/problems/kth-largest-element-in-bst/1", "companies": "Accolite Amazon Samsung SAP Labs Microsoft", "note": null, "bonus": false}, {"id": "m219", "topic": "Binary Search Trees", "q": "Validate Binary Search Tree", "link": "https://leetcode.com/problems/validate-binary-search-tree/", "companies": "OYO Rooms Qualcomm Samsung Snapdeal VMWare Walmart Wooker Amazon Facebook", "note": null, "bonus": false}, {"id": "m220", "topic": "Binary Search Trees", "q": "Kth Smallest Element in a BST", "link": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/", "companies": "Accolite Amazon Google", "note": null, "bonus": false}, {"id": "m221", "topic": "Binary Search Trees", "q": "Delete Node in a BST", "link": "https://leetcode.com/problems/delete-node-in-a-bst/", "companies": "Adobe Barclays", "note": null, "bonus": false}, {"id": "m222", "topic": "Binary Search Trees", "q": "Flatten BST to sorted list", "link": "https://www.geeksforgeeks.org/flatten-bst-to-sorted-list-increasing-order/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m223", "topic": "Binary Search Trees", "q": "Preorder to Postorder", "link": "https://practice.geeksforgeeks.org/problems/preorder-to-postorder4423/1", "companies": "Amazon Linkedin Flipkart", "note": null, "bonus": false}, {"id": "m224", "topic": "Binary Search Trees", "q": "Count BST nodes that lie in a given range", "link": "https://practice.geeksforgeeks.org/problems/count-bst-nodes-that-lie-in-a-given-range/1", "companies": "D-E-Shaw Google", "note": null, "bonus": false}, {"id": "m225", "topic": "Binary Search Trees", "q": "Populate Inorder Successor for all Nodes", "link": "https://practice.geeksforgeeks.org/problems/populate-inorder-successor-for-all-nodes/1", "companies": "Sap labs", "note": null, "bonus": false}, {"id": "m226", "topic": "Binary Search Trees", "q": "Convert Normal BST to Balanced BST", "link": "https://www.geeksforgeeks.org/convert-normal-bst-balanced-bst/", "companies": "Paytm", "note": null, "bonus": false}, {"id": "m227", "topic": "Binary Search Trees", "q": "Merge two BSTs", "link": "https://www.geeksforgeeks.org/merge-two-balanced-binary-search-trees/", "companies": "DE Shaw India", "note": null, "bonus": false}, {"id": "m228", "topic": "Binary Search Trees", "q": "Given n appointments, find all conflicting appointments", "link": "https://www.geeksforgeeks.org/given-n-appointments-find-conflicting-appointments/", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m229", "topic": "Binary Search Trees", "q": "Replace every element", "link": "https://www.geeksforgeeks.org/replace-every-element-with-the-least-greater-element-on-its-right/", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m230", "topic": "Binary Search Trees", "q": "Construct BST from given preorder traversal", "link": "https://www.geeksforgeeks.org/construct-bst-from-given-preorder-traversa/", "companies": "Adobe Morgan Stanley Microsoft", "note": null, "bonus": false}, {"id": "m231", "topic": "Binary Search Trees", "q": "Find median of BST in O(n) time and O(1) space", "link": "https://www.geeksforgeeks.org/find-median-bst-time-o1-space/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m232", "topic": "Binary Search Trees", "q": "Largest BST in a Binary Tree", "link": "https://www.geeksforgeeks.org/largest-bst-binary-tree-set-2/", "companies": "Amazon D-E-Shaw Samsung Microsoft Flipkart", "note": "Important", "bonus": false}, {"id": "m233", "topic": "Heaps & Hashing", "q": "Choose k array elements such that difference of maximum and minimum is minimized", "link": "https://www.geeksforgeeks.org/k-numbers-difference-maximum-minimum-k-number-minimized/", "companies": null, "note": null, "bonus": false}, {"id": "m234", "topic": "Heaps & Hashing", "q": "Heap Sort", "link": "https://www.geeksforgeeks.org/heap-sort/", "companies": "Adobe", "note": null, "bonus": false}, {"id": "m235", "topic": "Heaps & Hashing", "q": "Top K Frequent Elements", "link": "https://leetcode.com/problems/top-k-frequent-elements/", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m236", "topic": "Heaps & Hashing", "q": "k largest elements in an array", "link": "https://www.geeksforgeeks.org/k-largestor-smallest-elements-in-an-array/", "companies": "Amazon Microsoft Walmart Adobe", "note": null, "bonus": false}, {"id": "m237", "topic": "Heaps & Hashing", "q": "Next Greater Element", "link": "https://www.geeksforgeeks.org/next-greater-element/", "companies": "Amazon + Microsoft + Flipkart + Adobe", "note": null, "bonus": false}, {"id": "m238", "topic": "Heaps & Hashing", "q": "K\u2019th Smallest/Largest Element in Unsorted Array", "link": "https://www.geeksforgeeks.org/kth-smallestlargest-element-unsorted-array/", "companies": "ABCO Accolite Amazon Cisco Hike Microsoft Snapdeal VMWare Google Adobe", "note": null, "bonus": false}, {"id": "m239", "topic": "Heaps & Hashing", "q": "Find the maximum repeating number in O(n) time and O(1) extra space", "link": "https://www.geeksforgeeks.org/find-the-maximum-repeating-number-in-ok-time/", "companies": "Accolite Amazon", "note": null, "bonus": false}, {"id": "m240", "topic": "Heaps & Hashing", "q": "K-th smallest element after removing some integers from natural numbers", "link": "https://www.geeksforgeeks.org/k-th-smallest-element-removing-integers-natural-numbers/", "companies": "ABCO Accolite Amazon Cisco Hike Microsoft Snapdeal VMWare Google Adobe", "note": null, "bonus": false}, {"id": "m241", "topic": "Heaps & Hashing", "q": "Find k closest elements to a given value", "link": "https://www.geeksforgeeks.org/find-k-closest-elements-given-value/", "companies": "Amazon OYO Rooms", "note": null, "bonus": false}, {"id": "m242", "topic": "Heaps & Hashing", "q": "K\u2019th largest element in a stream", "link": "https://www.geeksforgeeks.org/kth-largest-element-in-a-stream/", "companies": "Amazon Cisco Hike OYO Rooms Walmart Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m243", "topic": "Heaps & Hashing", "q": "Connect Ropes", "link": "https://www.geeksforgeeks.org/connect-n-ropes-minimum-cost/", "companies": "Amazoon + Oyo + Goldman Sachs", "note": null, "bonus": false}, {"id": "m244", "topic": "Heaps & Hashing", "q": "Cuckoo Hashing", "link": "https://www.geeksforgeeks.org/cuckoo-hashing/", "companies": "Amaxon", "note": null, "bonus": false}, {"id": "m245", "topic": "Heaps & Hashing", "q": "Itinerary from a List of Tickets", "link": "https://www.geeksforgeeks.org/find-itinerary-from-a-given-list-of-tickets/", "companies": "Microsoft + Ola + eBay", "note": null, "bonus": false}, {"id": "m246", "topic": "Heaps & Hashing", "q": "Largest Subarray with 0 Sum", "link": "http://geeksforgeeks.org/find-the-largest-subarray-with-0-sum/", "companies": "Amazon MakeMyTrip Microsoft", "note": null, "bonus": false}, {"id": "m247", "topic": "Heaps & Hashing", "q": "Count distinct elements in every window of size k", "link": "https://www.geeksforgeeks.org/count-distinct-elements-in-every-window-of-size-k/", "companies": "Accolite Amazon Microsoft", "note": null, "bonus": false}, {"id": "m248", "topic": "Heaps & Hashing", "q": "Group Shifted Strings", "link": "https://www.geeksforgeeks.org/group-shifted-string/", "companies": "Oracle", "note": null, "bonus": false}, {"id": "m249", "topic": "Heaps & Hashing", "q": "Merge K Sorted lists", "link": "https://leetcode.com/problems/merge-k-sorted-lists/", "companies": "Microsoft + Ola + eBay", "note": null, "bonus": false}, {"id": "m250", "topic": "Heaps & Hashing", "q": "Find Median from Data Stream", "link": "https://leetcode.com/problems/find-median-from-data-stream/", "companies": "Adobe Amazon Apple Belzabar D-E-Shaw Facebook Flipkart Google Intuit Microsoft Morgan Stanley Ola Cabs Oracle Samsung SAP Labs Yahoo", "note": null, "bonus": false}, {"id": "m251", "topic": "Heaps & Hashing", "q": "Sliding Window Maximum", "link": "https://www.geeksforgeeks.org/sliding-window-maximum-maximum-of-all-subarrays-of-size-k/", "companies": "Amazon Directi Flipkart Microsoft Google", "note": null, "bonus": false}, {"id": "m252", "topic": "Heaps & Hashing", "q": "Find the smallest positive number", "link": "https://www.geeksforgeeks.org/find-the-smallest-positive-number-missing-from-an-unsorted-array/", "companies": "Accolite Amazon Samsung Snapdeal", "note": null, "bonus": false}, {"id": "m253", "topic": "Heaps & Hashing", "q": "Find Surpasser Count of each element in array", "link": "https://www.geeksforgeeks.org/find-surpasser-count-of-each-element-in-array/", "companies": "Amazon Morgan Stanley Ola Cabs SAP Labs", "note": null, "bonus": false}, {"id": "m254", "topic": "Heaps & Hashing", "q": "Tournament Tree and Binary Heap", "link": "https://www.geeksforgeeks.org/tournament-tree-and-binary-heap/", "companies": "Amazon Ola Cabs Samsung Synopsys Walmart Microsoft", "note": null, "bonus": false}, {"id": "m255", "topic": "Heaps & Hashing", "q": "Check for palindrome", "link": "https://www.geeksforgeeks.org/online-algorithm-for-checking-palindrome-in-a-stream/", "companies": "Amazon Cisco D-E-Shaw Facebook FactSet Morgan Stanley Paytm Zoho", "note": null, "bonus": false}, {"id": "m256", "topic": "Heaps & Hashing", "q": "Length of the largest subarray with contiguous elements", "link": "https://www.geeksforgeeks.org/length-largest-subarray-contiguous-elements-set-2/", "companies": "Amazon Intuit Microsoft", "note": null, "bonus": false}, {"id": "m257", "topic": "Heaps & Hashing", "q": "Palindrome Substring Queries", "link": "https://www.geeksforgeeks.org/palindrome-substring-queries/", "companies": "Amazon Morgan Stanley Ola Cabs SAP Labs", "note": null, "bonus": false}, {"id": "m258", "topic": "Heaps & Hashing", "q": "Subarray distinct elements", "link": "https://www.geeksforgeeks.org/subarrays-distinct-elements/", "companies": "Microsoft + Ola + eBay", "note": null, "bonus": false}, {"id": "m259", "topic": "Heaps & Hashing", "q": "Find the recurring function", "link": "https://www.geeksforgeeks.org/find-recurring-sequence-fraction/", "companies": "MAQ Software", "note": null, "bonus": false}, {"id": "m260", "topic": "Heaps & Hashing", "q": "K maximum sum combinations from two arrays", "link": "https://www.geeksforgeeks.org/k-maximum-sum-combinations-two-arrays/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m261", "topic": "Graphs", "q": "BFS", "link": "https://practice.geeksforgeeks.org/problems/bfs-traversal-of-graph/1", "companies": "Samsung + Delhivery + SAP Labs", "note": null, "bonus": false}, {"id": "m262", "topic": "Graphs", "q": "DFS", "link": "https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/", "companies": "Samsung + Intuit + Goldman Sachs", "note": null, "bonus": false}, {"id": "m263", "topic": "Graphs", "q": "Flood Fill Algorithm", "link": "https://leetcode.com/problems/flood-fill/", "companies": "Google + Adobe + Apple", "note": null, "bonus": false}, {"id": "m264", "topic": "Graphs", "q": "Number of Triangles", "link": "https://www.geeksforgeeks.org/number-of-triangles-in-directed-and-undirected-graphs/", "companies": "IBM", "note": null, "bonus": false}, {"id": "m265", "topic": "Graphs", "q": "Detect cycle in a graph", "link": "https://www.geeksforgeeks.org/detect-cycle-in-a-graph/", "companies": "Lenksart", "note": null, "bonus": false}, {"id": "m266", "topic": "Graphs", "q": "Detect cycle in an undirected graph", "link": "https://practice.geeksforgeeks.org/problems/detect-cycle-in-an-undirected-graph/1", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m267", "topic": "Graphs", "q": "Rat in a Maze Problem", "link": "https://practice.geeksforgeeks.org/problems/rat-in-a-maze-problem/1", "companies": "Sharechat + Directi", "note": null, "bonus": false}, {"id": "m268", "topic": "Graphs", "q": "Steps by Knight", "link": "https://practice.geeksforgeeks.org/problems/steps-by-knight5927/1", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m269", "topic": "Graphs", "q": "Clone graph", "link": "https://leetcode.com/problems/clone-graph/", "companies": "Google + MAQ Software + Apple + Facebook", "note": null, "bonus": false}, {"id": "m270", "topic": "Graphs", "q": "Number of Operations to Make Network Connected", "link": "https://leetcode.com/problems/number-of-operations-to-make-network-connected/", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m271", "topic": "Graphs", "q": "Dijkstra\u2019s shortest path algorithm", "link": "https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m272", "topic": "Graphs", "q": "Topological Sort", "link": "https://practice.geeksforgeeks.org/problems/topological-sort/1", "companies": "Amazon + Google + Flipkart + Oyo + Fipkart + Samsung", "note": null, "bonus": false}, {"id": "m273", "topic": "Graphs", "q": "Oliver and the Game", "link": "https://www.hackerearth.com/practice/algorithms/graphs/topological-sort/practice-problems/algorithm/oliver-and-the-game-3/", "companies": "Sharechat + Directi", "note": null, "bonus": false}, {"id": "m274", "topic": "Graphs", "q": "Minimum time taken by each job to be completed given by a Directed Acyclic Graph", "link": "https://www.geeksforgeeks.org/minimum-time-taken-by-each-job-to-be-completed-given-by-a-directed-acyclic-graph/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m275", "topic": "Graphs", "q": "Find whether it is possible to finish all tasks or not from given dependencies", "link": "https://www.geeksforgeeks.org/find-whether-it-is-possible-to-finish-all-tasks-or-not-from-given-dependencies/", "companies": "Directi + Sharechat", "note": null, "bonus": false}, {"id": "m276", "topic": "Graphs", "q": "Find the number of islands", "link": "https://practice.geeksforgeeks.org/problems/find-the-number-of-islands/1", "companies": "Razorpay", "note": null, "bonus": false}, {"id": "m277", "topic": "Graphs", "q": "Prim's Algo", "link": "https://www.geeksforgeeks.org/prims-minimum-spanning-tree-mst-greedy-algo-5/", "companies": "Visa", "note": null, "bonus": false}, {"id": "m278", "topic": "Graphs", "q": "Negative Weighted Cycle", "link": "https://practice.geeksforgeeks.org/problems/negative-weight-cycle3504/1", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m279", "topic": "Graphs", "q": "Floyd Warshall", "link": "https://practice.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1", "companies": "Google + Uber", "note": null, "bonus": false}, {"id": "m280", "topic": "Graphs", "q": "Graph Coloring", "link": "https://www.geeksforgeeks.org/graph-coloring-applications/", "companies": "Morgan Stanley", "note": null, "bonus": false}, {"id": "m281", "topic": "Graphs", "q": "Snakes and Ladders", "link": "https://leetcode.com/problems/snakes-and-ladders/", "companies": "Goldman Sachs +Makemytrip", "note": null, "bonus": false}, {"id": "m282", "topic": "Graphs", "q": "Kosaraju's Theorem", "link": "https://practice.geeksforgeeks.org/problems/strongly-connected-components-kosarajus-algo/1", "companies": "Paytm", "note": null, "bonus": false}, {"id": "m283", "topic": "Graphs", "q": "Journey to moon", "link": "https://www.hackerrank.com/challenges/journey-to-the-moon/problem", "companies": "Lenksart + Payload", "note": null, "bonus": false}, {"id": "m284", "topic": "Graphs", "q": "Vertex Cover", "link": "https://www.geeksforgeeks.org/vertex-cover-problem-set-1-introduction-approximate-algorithm-2/", "companies": "Intuit", "note": null, "bonus": false}, {"id": "m285", "topic": "Graphs", "q": "M Coloring Problem", "link": "https://practice.geeksforgeeks.org/problems/m-coloring-problem-1587115620/1", "companies": "Uber", "note": null, "bonus": false}, {"id": "m286", "topic": "Graphs", "q": "Cheapest Flights Within K Stops", "link": "https://leetcode.com/problems/cheapest-flights-within-k-stops/description/", "companies": "Uber + Paypal", "note": null, "bonus": false}, {"id": "m287", "topic": "Graphs", "q": "Find if there is a path of more than k length from a source", "link": "https://www.geeksforgeeks.org/find-if-there-is-a-path-of-more-than-k-length-from-a-source/", "companies": "Cisco + Intuit", "note": null, "bonus": false}, {"id": "m288", "topic": "Graphs", "q": "Bellman Ford", "link": "https://www.geeksforgeeks.org/detect-negative-cycle-graph-bellman-ford/", "companies": "Sharechat + Directi", "note": null, "bonus": false}, {"id": "m289", "topic": "Graphs", "q": "Bipartitie Graph", "link": "https://www.geeksforgeeks.org/bipartite-graph/", "companies": "Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m290", "topic": "Graphs", "q": "Word-Ladder", "link": "https://leetcode.com/problems/word-ladder/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m291", "topic": "Graphs", "q": "Allen Dictionary", "link": "https://practice.geeksforgeeks.org/problems/alien-dictionary/1", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m292", "topic": "Graphs", "q": "Kruskals MST", "link": "https://www.geeksforgeeks.org/kruskals-minimum-spanning-tree-algorithm-greedy-algo-2/", "companies": "Amazon Cisco Samsung", "note": "Important", "bonus": false}, {"id": "m293", "topic": "Graphs", "q": "Total number spanning trees graph", "link": "https://www.geeksforgeeks.org/total-number-spanning-trees-graph/", "companies": "Amazon Cisco Samsung Microsoft Flipkart", "note": null, "bonus": false}, {"id": "m294", "topic": "Graphs", "q": "Travelling Salesman", "link": "https://www.geeksforgeeks.org/travelling-salesman-problem-set-1/", "companies": "Google + Microsoft + Opera", "note": "Important", "bonus": false}, {"id": "m295", "topic": "Graphs", "q": "Find longest path directed acyclic graph", "link": "https://www.geeksforgeeks.org/find-longest-path-directed-acyclic-graph/", "companies": "Google", "note": null, "bonus": false}, {"id": "m296", "topic": "Graphs", "q": "Two Clique Problem", "link": "https://www.geeksforgeeks.org/two-clique-problem-check-graph-can-divided-two-cliques/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m297", "topic": "Graphs", "q": "Minimise the cash flow", "link": "https://www.geeksforgeeks.org/minimize-cash-flow-among-given-set-friends-borrowed-money/", "companies": "Intuit + Uber", "note": null, "bonus": false}, {"id": "m298", "topic": "Graphs", "q": "Chinese postman", "link": "https://www.geeksforgeeks.org/chinese-postman-route-inspection-set-1-introduction/", "companies": "Intuit", "note": null, "bonus": false}, {"id": "m299", "topic": "Graphs", "q": "Water Jug", "link": "https://www.geeksforgeeks.org/water-jug-problem-using-bfs/", "companies": "Intuit + Uber", "note": null, "bonus": false}, {"id": "m300", "topic": "Graphs", "q": "Water Jug 2", "link": "https://www.geeksforgeeks.org/water-jug-problem-using-bfs/", "companies": "MakeMyTrip MAQ Software", "note": null, "bonus": false}, {"id": "m301", "topic": "Tries", "q": "Construct a trie from scratch", "link": "https://www.geeksforgeeks.org/trie-insert-and-search/", "companies": "Accolite Amazon D-E-Shaw FactSet Microsoft", "note": null, "bonus": false}, {"id": "m302", "topic": "Tries", "q": "Print unique rows in a given boolean matrix", "link": "https://practice.geeksforgeeks.org/problems/unique-rows-in-boolean-matrix/1", "companies": "Amazon Zoho", "note": null, "bonus": false}, {"id": "m303", "topic": "Tries", "q": "Word Break Problem | (Trie solution)", "link": "https://www.geeksforgeeks.org/word-break-problem-trie-solution/", "companies": "Amazon Google Hike IBM MAQ Software Microsoft Walmart Zoho", "note": null, "bonus": false}, {"id": "m304", "topic": "Tries", "q": "Given a sequence of words, print all anagrams together", "link": "https://practice.geeksforgeeks.org/problems/k-anagrams-1/0", "companies": "Amazon D-E-Shaw Goldman Sachs Morgan Stanley Snapdeal Microsoft", "note": null, "bonus": false}, {"id": "m305", "topic": "Tries", "q": "Find shortest unique prefix for every word in a given list", "link": "https://www.geeksforgeeks.org/find-all-shortest-unique-prefixes-to-represent-each-word-in-a-given-list/", "companies": "Microsoft Google", "note": null, "bonus": false}, {"id": "m306", "topic": "Tries", "q": "Implement a Phone Directory", "link": "https://practice.geeksforgeeks.org/problems/phone-directory/0", "companies": "Amazon + Microsoft + Snapdeal", "note": null, "bonus": false}, {"id": "m307", "topic": "DP", "q": "Knapsack with Duplicate Items", "link": "https://practice.geeksforgeeks.org/problems/knapsack-with-duplicate-items4201/1", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m308", "topic": "DP", "q": "BBT counter", "link": "https://practice.geeksforgeeks.org/problems/bbt-counter4914/1", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m309", "topic": "DP", "q": "Reach a given score", "link": "https://practice.geeksforgeeks.org/problems/reach-a-given-score-1587115621/1", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m310", "topic": "DP", "q": "Maximum difference of zeros and ones in binary string", "link": "https://practice.geeksforgeeks.org/problems/maximum-difference-of-zeros-and-ones-in-binary-string4111/1", "companies": "Ola", "note": null, "bonus": false}, {"id": "m311", "topic": "DP", "q": "Climbing Stairs", "link": "https://leetcode.com/problems/climbing-stairs/", "companies": "Intuit", "note": null, "bonus": false}, {"id": "m312", "topic": "DP", "q": "Permutation Coefficient", "link": "https://www.geeksforgeeks.org/permutation-coefficient/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m313", "topic": "DP", "q": "Longest Repeating Subsequence", "link": "https://practice.geeksforgeeks.org/problems/longest-repeating-subsequence2004/1", "companies": "Google + Amazon", "note": null, "bonus": false}, {"id": "m314", "topic": "DP", "q": "Pairs with specific difference", "link": "https://practice.geeksforgeeks.org/problems/pairs-with-specific-difference1533/1", "companies": "Ola", "note": null, "bonus": false}, {"id": "m315", "topic": "DP", "q": "Longest subsequence-1", "link": "https://practice.geeksforgeeks.org/problems/longest-subsequence-such-that-difference-between-adjacents-is-one4724/1", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m316", "topic": "DP", "q": "Coin Change", "link": "https://leetcode.com/problems/coin-change/", "companies": "Microsoft+ Samsung + Barclays + Apple + Adobe", "note": null, "bonus": false}, {"id": "m317", "topic": "DP", "q": "LIS", "link": "https://leetcode.com/problems/longest-increasing-subsequence/", "companies": "Amazon + Google + Facebook + Fidelity International", "note": null, "bonus": false}, {"id": "m318", "topic": "DP", "q": "Longest Common Subsequence", "link": "https://leetcode.com/problems/longest-common-subsequence/", "companies": "Siemens + Amazon + Google", "note": null, "bonus": false}, {"id": "m319", "topic": "DP", "q": "Word Break", "link": "https://leetcode.com/problems/word-break/", "companies": "Amazon + Google + Microsoft + Walmart + Apple + IBM", "note": null, "bonus": false}, {"id": "m320", "topic": "DP", "q": "Combination Sum IV", "link": "https://leetcode.com/problems/combination-sum-iv/", "companies": "Adobe Amazon Microsoft", "note": null, "bonus": false}, {"id": "m321", "topic": "DP", "q": "House Robber", "link": "https://leetcode.com/problems/house-robber/", "companies": "Apple + Uber", "note": null, "bonus": false}, {"id": "m322", "topic": "DP", "q": "Houe Robber 2", "link": "https://leetcode.com/problems/house-robber-ii/", "companies": "Arrays Dynamic Programming", "note": null, "bonus": false}, {"id": "m323", "topic": "DP", "q": "Decode Ways", "link": "https://leetcode.com/problems/decode-ways/", "companies": "Adobe + Uber", "note": null, "bonus": false}, {"id": "m324", "topic": "DP", "q": "Unique Paths", "link": "https://leetcode.com/problems/unique-paths/", "companies": "Google + Microsoft", "note": null, "bonus": false}, {"id": "m325", "topic": "DP", "q": "Jumps Game", "link": "https://leetcode.com/problems/jump-game/", "companies": "Facebook Amazon Microsoft Google", "note": null, "bonus": false}, {"id": "m326", "topic": "DP", "q": "Knapsack Problem", "link": "https://practice.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1", "companies": "Amazon Directi Flipkart GreyOrange Microsoft Mobicip Morgan Stanley Oracle Payu Snapdeal Visa", "note": null, "bonus": false}, {"id": "m327", "topic": "DP", "q": "nCr", "link": "https://practice.geeksforgeeks.org/problems/ncr1019/1", "companies": "Google", "note": null, "bonus": false}, {"id": "m328", "topic": "DP", "q": "Catalan Number", "link": "https://www.geeksforgeeks.org/program-nth-catalan-number/", "companies": "Amazon + Google", "note": null, "bonus": false}, {"id": "m329", "topic": "DP", "q": "Edit Distance", "link": "https://practice.geeksforgeeks.org/problems/edit-distance3702/1", "companies": "Google + Goldman Sachs + Citrix", "note": null, "bonus": false}, {"id": "m330", "topic": "DP", "q": "Subset Sum", "link": "https://practice.geeksforgeeks.org/problems/subset-sum-problem2014/1", "companies": "Amazon + Google", "note": null, "bonus": false}, {"id": "m331", "topic": "DP", "q": "Gold mine", "link": "https://www.geeksforgeeks.org/gold-mine-problem/", "companies": "Samsung", "note": null, "bonus": false}, {"id": "m332", "topic": "DP", "q": "Assembly Line Scheduling", "link": "https://www.geeksforgeeks.org/assembly-line-scheduling-dp-34/", "companies": "Goldman Sachs", "note": null, "bonus": false}, {"id": "m333", "topic": "DP", "q": "Maximize The Cut Segments", "link": "https://practice.geeksforgeeks.org/problems/cutted-segments1642/1", "companies": "Amazon OYO Rooms Microsoft", "note": null, "bonus": false}, {"id": "m334", "topic": "DP", "q": "Maximum sum increasing subsequence", "link": "https://practice.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1", "companies": "Amazon Morgan Stanley Microsoft", "note": null, "bonus": false}, {"id": "m335", "topic": "DP", "q": "Count all subsequences having product less than K", "link": "https://www.geeksforgeeks.org/count-subsequences-product-less-k/", "companies": "Goldman Sachs", "note": null, "bonus": false}, {"id": "m336", "topic": "DP", "q": "Maximum sum increasing subsequence", "link": "https://www.geeksforgeeks.org/maximum-subsequence-sum-such-that-no-three-are-consecutive/", "companies": "Amazon Morgan Stanley Microsoft", "note": null, "bonus": false}, {"id": "m337", "topic": "DP", "q": "Egg dropping puzzle", "link": "https://practice.geeksforgeeks.org/problems/egg-dropping-puzzle-1587115620/1", "companies": "Amazon D-E-Shaw Goldman Sachs Google Hike MakeMyTrip MAQ Software Myntra Nearbuy Opera Oracle Philips Samsung Service Now Unisys VMWare Microsoft", "note": null, "bonus": false}, {"id": "m338", "topic": "DP", "q": "Max length chain", "link": "https://practice.geeksforgeeks.org/problems/max-length-chain/1", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m339", "topic": "DP", "q": "Largest Square in Matrix", "link": "https://practice.geeksforgeeks.org/problems/largest-square-formed-in-a-matrix0806/1", "companies": "Amazon Samsung", "note": null, "bonus": false}, {"id": "m340", "topic": "DP", "q": "Maximum Path Sum", "link": "https://practice.geeksforgeeks.org/problems/path-in-matrix3805/1", "companies": "Amazon + Microsoft + Oyo + Directi", "note": null, "bonus": false}, {"id": "m341", "topic": "DP", "q": "Minimum Number of Jumps", "link": "https://practice.geeksforgeeks.org/problems/minimum-number-of-jumps-1587115620/1", "companies": "Adobe Amazon Housing.com Moonfrog Labs Walmart Microsoft Google Flipkart", "note": null, "bonus": false}, {"id": "m342", "topic": "DP", "q": "Minimum removals from array to make max \u2013 min <= K", "link": "http://geeksforgeeks.org/minimum-removals-array-make-max-min-k/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m343", "topic": "DP", "q": "Longest Common Substring", "link": "https://practice.geeksforgeeks.org/problems/longest-common-substring1452/1", "companies": "Webarch Club", "note": null, "bonus": false}, {"id": "m344", "topic": "DP", "q": "Partition Equal Subset Sum", "link": "https://practice.geeksforgeeks.org/problems/subset-sum-problem2014/1", "companies": "Amazon + Accolite + Traveloca + Adobe", "note": null, "bonus": false}, {"id": "m345", "topic": "DP", "q": "Longest Palindromic Subsequnce", "link": "https://www.geeksforgeeks.org/longest-palindromic-subsequence-dp-12/", "companies": "Amazon Google", "note": null, "bonus": false}, {"id": "m346", "topic": "DP", "q": "Count Palindromic Subsequences", "link": "https://practice.geeksforgeeks.org/problems/count-palindromic-subsequences/1", "companies": "Myntra", "note": null, "bonus": false}, {"id": "m347", "topic": "DP", "q": "Longest Palindromic Substring", "link": "https://leetcode.com/problems/longest-palindromic-substring/", "companies": "Amazon + Microsoft + Samsung + Visa", "note": null, "bonus": false}, {"id": "m348", "topic": "DP", "q": "Longest Alternating Sequence", "link": "https://practice.geeksforgeeks.org/problems/longest-alternating-subsequence5951/1", "companies": "Ola", "note": null, "bonus": false}, {"id": "m349", "topic": "DP", "q": "Weighted Job Scheduling", "link": "https://www.geeksforgeeks.org/weighted-job-scheduling/", "companies": "Intuit", "note": null, "bonus": false}, {"id": "m350", "topic": "DP", "q": "Coin Game", "link": "https://www.geeksforgeeks.org/coin-game-winner-every-player-three-choices/", "companies": "Salesforce", "note": null, "bonus": false}, {"id": "m351", "topic": "DP", "q": "Coin Game Winner", "link": "https://www.geeksforgeeks.org/count-derangements-permutation-such-that-no-element-appears-in-its-original-position/", "companies": "Ola", "note": null, "bonus": false}, {"id": "m352", "topic": "DP", "q": "Optimal Strategy for a game", "link": "https://practice.geeksforgeeks.org/problems/optimal-strategy-for-a-game-1587115620/1", "companies": "Google + IBM", "note": null, "bonus": false}, {"id": "m353", "topic": "DP", "q": "Word Wrap", "link": "https://practice.geeksforgeeks.org/problems/word-wrap1646/1", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m354", "topic": "DP", "q": "Mobile numeric keypad", "link": "https://practice.geeksforgeeks.org/problems/mobile-numeric-keypad5456/1", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m355", "topic": "DP", "q": "Maximum Length of Pair Chain", "link": "https://leetcode.com/problems/maximum-length-of-pair-chain/", "companies": "Amazon Microsoft", "note": null, "bonus": false}, {"id": "m356", "topic": "DP", "q": "Matrix Chain Multiplication", "link": "https://www.geeksforgeeks.org/matrix-chain-multiplication-dp-8/", "companies": "Walmart + Flipkart", "note": null, "bonus": false}, {"id": "m357", "topic": "DP", "q": "Maximum profit by buying and selling a share at most twice", "link": "https://www.geeksforgeeks.org/maximum-profit-by-buying-and-selling-a-share-at-most-twice/", "companies": "Accolite Amazon Microsoft", "note": null, "bonus": false}, {"id": "m358", "topic": "DP", "q": "Optimal BST", "link": "https://www.geeksforgeeks.org/optimal-binary-search-tree-dp-24/", "companies": "Google", "note": null, "bonus": false}, {"id": "m359", "topic": "DP", "q": "Largest Submatrix with sum 0", "link": "https://www.geeksforgeeks.org/largest-rectangular-sub-matrix-whose-sum-0/", "companies": "Amazon MakeMyTrip Microsoft", "note": null, "bonus": false}, {"id": "m360", "topic": "DP", "q": "Largest area rectangular sub-matrix with equal number of 1\u2019s and 0\u2019s", "link": "https://www.geeksforgeeks.org/largest-area-rectangular-sub-matrix-equal-number-1s-0s/", "companies": "Amazon Directi Intuit MakeMyTrip Microsoft Samsung Google Flipkart", "note": null, "bonus": false}, {"id": "m361", "topic": "Bit Manipulation", "q": "Count set bits in an integer", "link": "https://practice.geeksforgeeks.org/problems/set-bits0143/1", "companies": "Adobe Apple", "note": null, "bonus": false}, {"id": "m362", "topic": "Bit Manipulation", "q": "Find the two non-repeating elements in an array of repeating elements", "link": "https://practice.geeksforgeeks.org/problems/finding-the-numbers0215/1", "companies": "Accolite Amazon FactSet Google MakeMyTrip Microsoft Qualcomm Samsung", "note": null, "bonus": false}, {"id": "m363", "topic": "Bit Manipulation", "q": "Program to find whether a no is power of two", "link": "https://practice.geeksforgeeks.org/problems/power-of-2/0", "companies": "Adobe", "note": null, "bonus": false}, {"id": "m364", "topic": "Bit Manipulation", "q": "Find position of the only set bit", "link": "https://practice.geeksforgeeks.org/problems/find-position-of-set-bit3706/1", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m365", "topic": "Bit Manipulation", "q": "Count number of bits to be flipped to convert A to B", "link": "https://practice.geeksforgeeks.org/problems/bit-difference/0", "companies": "Maq Software", "note": null, "bonus": false}, {"id": "m366", "topic": "Bit Manipulation", "q": "Count total set bits in all numbers from 1 to n", "link": "https://practice.geeksforgeeks.org/problems/count-total-set-bits/0", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m367", "topic": "Bit Manipulation", "q": "Copy set bits in a range", "link": "https://www.geeksforgeeks.org/copy-set-bits-in-a-range/", "companies": "Facebook", "note": null, "bonus": false}, {"id": "m368", "topic": "Bit Manipulation", "q": "Calculate square of a number without using *, / and pow()", "link": "https://www.geeksforgeeks.org/calculate-square-of-a-number-without-using-and-pow/", "companies": "Amazon", "note": null, "bonus": false}, {"id": "m369", "topic": "Bit Manipulation", "q": "Divide two integers without using multiplication, division and mod operator", "link": "https://www.geeksforgeeks.org/divide-two-integers-without-using-multiplication-division-mod-operator/", "companies": "Microsoft", "note": null, "bonus": false}, {"id": "m370", "topic": "Bit Manipulation", "q": "Power Set", "link": "https://practice.geeksforgeeks.org/problems/power-set4302/1", "companies": "Google + Adobe + Paytm", "note": null, "bonus": false}, {"id": "m371", "topic": "Segment Trees", "q": "Range Sum Query - Immutable", "link": "https://leetcode.com/problems/range-sum-query-immutable/", "companies": null, "note": null, "bonus": false}, {"id": "m372", "topic": "Segment Trees", "q": "Range Minimum Query", "link": "https://cp-algorithms.com/sequences/rmq.html", "companies": "Google Interview Qs", "note": null, "bonus": false}, {"id": "m373", "topic": "Segment Trees", "q": "Range Sum Query - Mutable", "link": "https://leetcode.com/problems/range-sum-query-mutable/", "companies": "Alibaba", "note": null, "bonus": false}, {"id": "m374", "topic": "Segment Trees", "q": "Create Sorted Array through Instructions", "link": "https://leetcode.com/problems/create-sorted-array-through-instructions/", "companies": "Samsung + Accolite", "note": null, "bonus": false}, {"id": "m375", "topic": "Segment Trees", "q": "Count of Range Sum", "link": "https://leetcode.com/problems/count-of-range-sum/", "companies": "Walmart", "note": null, "bonus": false}, {"id": "m376", "topic": "Segment Trees", "q": "Count of Smaller Numbers After Self", "link": "https://leetcode.com/problems/count-of-smaller-numbers-after-self/", "companies": "Codenation Google", "note": null, "bonus": false}, {"id": "b377", "topic": "Strings", "q": "Edit Distance", "link": "https://practice.geeksforgeeks.org/problems/edit-distance3702/1", "companies": null, "note": "use Dynaming Programming (if possible)", "bonus": true}, {"id": "b378", "topic": "Searching & Sorting", "q": "Sort a Nearly Sorted (or K sorted) Array", "link": "https://www.geeksforgeeks.org/nearly-sorted-algorithm/", "companies": null, "note": null, "bonus": true}, {"id": "b379", "topic": "Searching & Sorting", "q": "How to Efficiently Sort a Big List Dates in 20\u2019s", "link": "https://www.geeksforgeeks.org/how-to-efficiently-sort-a-big-list-dates-in-20s/", "companies": null, "note": null, "bonus": true}, {"id": "b380", "topic": "Searching & Sorting", "q": "find a repeating and a missing number", "link": "https://www.geeksforgeeks.org/find-a-repeating-and-a-missing-number/", "companies": null, "note": null, "bonus": true}, {"id": "b381", "topic": "Searching & Sorting", "q": "sort array according count set bits", "link": "https://www.geeksforgeeks.org/sort-array-according-count-set-bits/", "companies": null, "note": null, "bonus": true}, {"id": "b382", "topic": "Searching & Sorting", "q": "Minimum Swaps to Make Two Array Identical", "link": "https://www.geeksforgeeks.org/minimum-swaps-to-make-two-array-identical/", "companies": null, "note": null, "bonus": true}, {"id": "b383", "topic": "Searching & Sorting", "q": "Insert in Sorted and Non-Overlapping Interval Array", "link": "https://www.geeksforgeeks.org/insert-in-sorted-and-non-overlapping-interval-array/", "companies": null, "note": null, "bonus": true}, {"id": "b384", "topic": "Searching & Sorting", "q": "3-Way QuickSort", "link": "https://www.geeksforgeeks.org/3-way-quicksort-dutch-national-flag/", "companies": null, "note": null, "bonus": true}, {"id": "b385", "topic": "Backtracking", "q": "Find if There is a Path of More Than k Length From a Source", "link": "https://www.geeksforgeeks.org/find-if-there-is-a-path-of-more-than-k-length-from-a-source/", "companies": null, "note": null, "bonus": true}, {"id": "b386", "topic": "Backtracking", "q": "Match a Pattern and String without Using Regular Expressions", "link": "https://www.geeksforgeeks.org/match-a-pattern-and-string-without-using-regular-expressions/", "companies": null, "note": null, "bonus": true}, {"id": "b387", "topic": "Linked List", "q": "Josephus Circle implementation using STL list", "link": "https://www.geeksforgeeks.org/josephus-circle-using-circular-linked-list/", "companies": null, "note": null, "bonus": true}, {"id": "b388", "topic": "Linked List", "q": "Find a triplet from three linked lists with sum equal to a given Number", "link": "https://www.geeksforgeeks.org/find-a-triplet-from-three-linked-lists-with-sum-equal-to-a-given-number/", "companies": null, "note": null, "bonus": true}, {"id": "b389", "topic": "Linked List", "q": "Pair with given sum", "link": "https://www.geeksforgeeks.org/find-pair-given-sum-sorted-singly-linked-without-extra-space/", "companies": null, "note": null, "bonus": true}, {"id": "b390", "topic": "Linked List", "q": "Select a random node from a singly linked list", "link": "https://www.geeksforgeeks.org/select-a-random-node-from-a-singly-linked-list/", "companies": null, "note": null, "bonus": true}, {"id": "b391", "topic": "Linked List", "q": "First non repeating character", "link": "https://www.geeksforgeeks.org/find-first-non-repeating-character-stream-characters/", "companies": null, "note": null, "bonus": true}, {"id": "b392", "topic": "Stacks & Queues", "q": "Implement Stack using Queue or heap", "link": "https://www.geeksforgeeks.org/implement-stack-using-priority-queue-or-heap/", "companies": null, "note": null, "bonus": true}, {"id": "b393", "topic": "Stacks & Queues", "q": "Sum of minimum-maximum elements subarrays size-k", "link": "https://www.geeksforgeeks.org/sum-minimum-maximum-elements-subarrays-size-k/", "companies": null, "note": null, "bonus": true}, {"id": "b394", "topic": "Stacks & Queues", "q": "Minimum time required so that all oranges become rotten", "link": "https://www.geeksforgeeks.org/minimum-time-required-so-that-all-oranges-become-rotten/", "companies": null, "note": null, "bonus": true}, {"id": "b395", "topic": "Stacks & Queues", "q": "Efficiently implement k-queues single array", "link": "https://www.geeksforgeeks.org/efficiently-implement-k-queues-single-array/", "companies": null, "note": null, "bonus": true}, {"id": "b396", "topic": "Greedy", "q": "Maximize array sum after k-negation operations", "link": "https://www.geeksforgeeks.org/maximize-array-sun-after-k-negation-operations/", "companies": null, "note": null, "bonus": true}, {"id": "b397", "topic": "Greedy", "q": "Program for shortest job first or sjf-cpu scheduling set 1 non-preemptive", "link": "https://www.geeksforgeeks.org/program-for-shortest-job-first-or-sjf-cpu-scheduling-set-1-non-preemptive/", "companies": null, "note": null, "bonus": true}, {"id": "b398", "topic": "Binary Trees", "q": "Check Mirror in N-ary tree", "link": "https://practice.geeksforgeeks.org/problems/check-mirror-in-n-ary-tree1528/1", "companies": null, "note": null, "bonus": true}, {"id": "b399", "topic": "Binary Trees", "q": "Maximum sum of nodes in Binary tree such that no two are adjacent", "link": "https://www.geeksforgeeks.org/maximum-sum-nodes-binary-tree-no-two-adjacent/", "companies": null, "note": null, "bonus": true}, {"id": "b400", "topic": "Binary Search Trees", "q": "Brothers From Different Roots", "link": "https://practice.geeksforgeeks.org/problems/brothers-from-different-root/1", "companies": null, "note": null, "bonus": true}, {"id": "b401", "topic": "Heaps & Hashing", "q": "Check the condition", "link": "https://www.geeksforgeeks.org/find-four-elements-a-b-c-and-d-in-an-array-such-that-ab-cd/", "companies": null, "note": null, "bonus": true}, {"id": "b402", "topic": "Heaps & Hashing", "q": "Check if an array can be divided into pairs whose sum is divisible by k", "link": "https://www.geeksforgeeks.org/check-if-an-array-can-be-divided-into-pairs-whose-sum-is-divisible-by-k/", "companies": null, "note": null, "bonus": true}, {"id": "b403", "topic": "Heaps & Hashing", "q": "Design a effective DSA", "link": "https://www.geeksforgeeks.org/a-data-structure-question/", "companies": null, "note": null, "bonus": true}, {"id": "b404", "topic": "Heaps & Hashing", "q": "Find number of Employees Under every Manager", "link": "https://www.geeksforgeeks.org/find-number-of-employees-under-every-manager/", "companies": null, "note": null, "bonus": true}, {"id": "b405", "topic": "Heaps & Hashing", "q": "Pancake Sorting", "link": "https://www.geeksforgeeks.org/a-pancake-sorting-question/", "companies": null, "note": null, "bonus": true}, {"id": "b406", "topic": "Graphs", "q": "Bride in a graph", "link": "https://www.geeksforgeeks.org/bridge-in-a-graph/", "companies": null, "note": null, "bonus": true}, {"id": "b407", "topic": "Graphs", "q": "Seven Bridges of K\u00f6nigsberg", "link": "https://www.geeksforgeeks.org/paths-travel-nodes-using-edgeseven-bridges-konigsberg/", "companies": null, "note": null, "bonus": true}, {"id": "b408", "topic": "Graphs", "q": "Minimum edges to reverse to make path from a source to a destination", "link": "https://www.geeksforgeeks.org/minimum-edges-reverse-make-path-source-destination/", "companies": null, "note": null, "bonus": true}, {"id": "b409", "topic": "DP", "q": "Maximum Sum Rectangle", "link": "https://practice.geeksforgeeks.org/problems/maximum-sum-rectangle2948/1", "companies": null, "note": null, "bonus": true}, {"id": "b410", "topic": "DP", "q": "Interleaved Strings", "link": "https://practice.geeksforgeeks.org/problems/interleaved-strings/1", "companies": null, "note": null, "bonus": true}, {"id": "b411", "topic": "DP", "q": "Painting the Fence", "link": "https://practice.geeksforgeeks.org/problems/painting-the-fence3727/1", "companies": null, "note": null, "bonus": true}, {"id": "b412", "topic": "DP", "q": "Largest independent Set", "link": "https://www.geeksforgeeks.org/largest-independent-set-problem-dp-26/", "companies": null, "note": null, "bonus": true}, {"id": "b413", "topic": "DP", "q": "Minimum cost to fill given weight in a bag", "link": "https://practice.geeksforgeeks.org/problems/minimum-cost-to-fill-given-weight-in-a-bag1956/1", "companies": null, "note": null, "bonus": true}, {"id": "b414", "topic": "DP", "q": "Boolean Parenthesization", "link": "https://practice.geeksforgeeks.org/problems/boolean-parenthesization5610/1", "companies": null, "note": null, "bonus": true}, {"id": "b415", "topic": "DP", "q": "Maximum Profit", "link": "https://practice.geeksforgeeks.org/problems/maximum-profit4657/1", "companies": null, "note": null, "bonus": true}, {"id": "b416", "topic": "DP", "q": "Palindromic Partitioning", "link": "https://practice.geeksforgeeks.org/problems/palindromic-patitioning4845/1", "companies": null, "note": null, "bonus": true}]}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  var raw = document.getElementById('dsa-data').textContent;
+  var data = JSON.parse(raw);
+  var TOPICS = data.topics;
+  var ITEMS = data.items;
+  var TOTAL = ITEMS.length;
+  var SUPABASE_URL = 'https://kzxaaglqwpekbbhrvtmm.supabase.co';
+  var SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_uKg8TRoI_SWykhtdUeblwg_6YliXrvz';
+  var supabaseClient = window.supabase && window.supabase.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY) : null;
+  var currentUser = null;
+  var cloudEnabled = false;
+  var cloudSaveTimer = null;
+  var authMode = 'signin';
+
+  var authScreen = document.getElementById('authScreen');
+  var authLoading = document.getElementById('authLoading');
+  var authContent = document.getElementById('authContent');
+  var authHeading = document.getElementById('authHeading');
+  var authCopy = document.getElementById('authCopy');
+  var authForm = document.getElementById('authForm');
+  var authEmail = document.getElementById('authEmail');
+  var authPassword = document.getElementById('authPassword');
+  var authSubmit = document.getElementById('authSubmit');
+  var authSwitch = document.getElementById('authSwitch');
+  var authSwitchText = document.getElementById('authSwitchText');
+  var authMessage = document.getElementById('authMessage');
+
+  function showAuth(message, ok){
+    authScreen.style.display='flex'; authLoading.hidden=true; authContent.hidden=false;
+    authForm.hidden=false; authSwitch.parentElement.hidden=false;
+    if(message){ authMessage.textContent=message; authMessage.className='auth-message'+(ok?' ok':''); }
+  }
+  function setAuthMode(mode){
+    authMode=mode; var create=mode==='signup';
+    authHeading.textContent=create?'Create your account':'Welcome back';
+    authCopy.textContent=create?'Use your email and password to save your progress securely.':'Sign in to keep your DSA journey safe and synced across devices.';
+    authSubmit.textContent=create?'Create account':'Sign in';
+    authPassword.autocomplete=create?'new-password':'current-password';
+    authSwitchText.textContent=create?'Already have an account?':'New here?';
+    authSwitch.textContent=create?'Sign in':'Create an account';
+    authMessage.textContent=''; authMessage.className='auth-message';
+  }
+  function localTarget(){ try{return JSON.parse(localStorage.getItem('dsa-sheet-target-v1')||'null');}catch(e){return null;} }
+  function mergeMaps(a,b){ return Object.assign({},a||{},b||{}); }
+  function queueCloudSave(){
+    if(!currentUser || !cloudEnabled || !supabaseClient) return;
+    clearTimeout(cloudSaveTimer);
+    cloudSaveTimer=setTimeout(saveCloudProgress,450);
+  }
+  async function saveCloudProgress(){
+    if(!currentUser || !supabaseClient) return;
+    var payload={user_id:currentUser.id,solved:solved,bookmarks:bookmarks,target:localTarget(),updated_at:new Date().toISOString()};
+    var result=await supabaseClient.from('dsa_progress').upsert(payload,{onConflict:'user_id'});
+    if(result.error) console.warn('Cloud sync failed:',result.error.message);
+  }
+  async function loadCloudProgress(){
+    if(!currentUser || !cloudEnabled || !supabaseClient) return;
+    var result=await supabaseClient.from('dsa_progress').select('solved, bookmarks, target').eq('user_id',currentUser.id).maybeSingle();
+    if(result.error){ console.warn('Cloud load failed:',result.error.message); return; }
+    var row=result.data;
+    if(row){
+      solved=mergeMaps(solved,row.solved); bookmarks=mergeMaps(bookmarks,row.bookmarks);
+      try{localStorage.setItem(STORE_KEY,JSON.stringify(solved));localStorage.setItem(BOOKMARK_KEY,JSON.stringify(bookmarks));}catch(e){}
+      if(row.target){ try{localStorage.setItem(TARGET_KEY,JSON.stringify(row.target));}catch(e){} targetStart.value=row.target.start||targetStart.value; targetEnd.value=row.target.end||targetEnd.value; targetTopic.value=row.target.topic||targetTopic.value; }
+      if(row.target){ targetNote.textContent=(row.target.topic||'All topics')+' · '+row.target.start+' to '+row.target.end; viewCalendar.classList.add('show'); }
+      renderTargetPreview(); updateStats(); render();
+    }
+    queueCloudSave();
+  }
+  async function ensureAccess(user){
+    var result=await supabaseClient.from('dsa_access').select('approved').eq('user_id',user.id).maybeSingle();
+    if(result.error) { console.warn('Access check failed:',result.error.message); return null; }
+    if(!result.data){
+      var created=await supabaseClient.from('dsa_access').insert({user_id:user.id,email:user.email,approved:false}).select('approved').single();
+      if(created.error){ console.warn('Access request failed:',created.error.message); return null; }
+      return created.data;
+    }
+    return result.data;
+  }
+  function showPendingApproval(){
+    authScreen.style.display='flex'; authLoading.hidden=true; authContent.hidden=false; authForm.hidden=true; authSwitch.parentElement.hidden=true;
+    authHeading.textContent='Awaiting approval';
+    authCopy.textContent='Your account request has been sent. An administrator must approve your email in Supabase before you can access the tracker.';
+    authMessage.textContent='Please return after approval, then sign in again.'; authMessage.className='auth-message ok';
+  }
+  async function setSignedInUser(user){
+    currentUser=user; cloudEnabled=false;
+    if(!user){ currentUser=null; showAuth(); setAuthMode('signin'); return; }
+    var account=document.getElementById('accountButton'); if(account) account.textContent=user.email ? 'Sign out · '+user.email : 'Sign out';
+    var access=await ensureAccess(user);
+    if(!access || !access.approved){ showPendingApproval(); return; }
+    cloudEnabled=true; authScreen.style.display='none';
+    await loadCloudProgress();
+  }
+  async function initAuth(){
+    if(!supabaseClient){showAuth('Could not load secure sign-in. Check your connection.');return;}
+    var sessionResult=await supabaseClient.auth.getSession();
+    await setSignedInUser(sessionResult.data&&sessionResult.data.session?sessionResult.data.session.user:null);
+    supabaseClient.auth.onAuthStateChange(function(event,session){ if(event==='SIGNED_OUT') setSignedInUser(null); });
+  }
+
+  var STORE_KEY = 'dsa-sheet-progress-v1';
+  var BOOKMARK_KEY = 'dsa-sheet-bookmarks-v1';
+  var solved = {};
+  try{
+    var saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (saved && typeof saved === 'object') solved = saved;
+  }catch(e){}
+  var bookmarks = {};
+  try{ bookmarks = JSON.parse(localStorage.getItem(BOOKMARK_KEY) || '{}') || {}; }catch(e){}
+
+  function persist(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(solved)); }catch(e){}
+    queueCloudSave();
+  }
+  function persistBookmarks(){ try{ localStorage.setItem(BOOKMARK_KEY, JSON.stringify(bookmarks)); }catch(e){} queueCloudSave(); }
+
+  // group items by topic, preserving TOPICS order
+  var byTopic = {};
+  TOPICS.forEach(function(t){ byTopic[t] = []; });
+  ITEMS.forEach(function(it){
+    if(!byTopic[it.topic]) byTopic[it.topic] = [];
+    byTopic[it.topic].push(it);
+  });
+
+  var listEl = document.getElementById('list');
+  var railEl = document.getElementById('rail');
+  var segbarEl = document.getElementById('segbar');
+  var emptyEl = document.getElementById('emptyState');
+  var solvedCountEl = document.getElementById('solvedCount');
+  var totalCountEl = document.getElementById('totalCount');
+  var pctLabelEl = document.getElementById('pctLabel');
+  var searchInput = document.getElementById('searchInput');
+  var hideSolvedCb = document.getElementById('hideSolved');
+  var bonusOnlyCb = document.getElementById('bonusOnly');
+  var hideSolvedWrap = document.getElementById('hideSolvedWrap');
+  var bonusOnlyWrap = document.getElementById('bonusOnlyWrap');
+  var resetBtn = document.getElementById('resetBtn');
+  var savedOnlyBtn = document.getElementById('savedOnly');
+  var calendarModal = document.getElementById('calendarModal');
+  var calendarCard = document.getElementById('calendarCard');
+  var calendarTitle = document.getElementById('calendarTitle');
+  var calendarIntro = document.getElementById('calendarIntro');
+  var targetStart = document.getElementById('targetStart');
+  var targetEnd = document.getElementById('targetEnd');
+  var targetTopic = document.getElementById('targetTopic');
+  var planLength = document.getElementById('planLength');
+  var planPace = document.getElementById('planPace');
+  var calendarDays = document.getElementById('calendarDays');
+  var targetNote = document.getElementById('targetNote');
+  var dailyCount = document.getElementById('dailyCount');
+  var viewCalendar = document.getElementById('viewCalendar');
+  var TARGET_KEY = 'dsa-sheet-target-v1';
+
+  var activeTopic = null;
+  var savedOnly = false;
+  ITEMS.forEach(function(it){ if(it.id === 'm336') it.link = 'https://practice.geeksforgeeks.org/problems/maximum-sum-increasing-subsequence4749/1'; });
+
+  function esc(s){
+    return (s||'').replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  var GO_ICON = '<svg class="go" viewBox="0 0 16 16" fill="none"><path d="M6 3h7v7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 3 3 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function buildRail(){
+    TOPICS.forEach(function(t){
+      var items = byTopic[t] || [];
+      var pill = document.createElement('div');
+      pill.className = 'pill';
+      pill.dataset.topic = t;
+      pill.innerHTML = esc(t) + ' <span class="n">' + items.length + '</span>';
+      railEl.appendChild(pill);
+    });
+
+    railEl.addEventListener('click', function(e){
+      var pill = e.target.closest('.pill');
+      if(!pill) return;
+      activeTopic = activeTopic === pill.dataset.topic ? null : pill.dataset.topic;
+      Array.prototype.forEach.call(railEl.querySelectorAll('.pill'), function(p){
+        p.classList.toggle('active', p.dataset.topic === activeTopic);
+      });
+      if(activeTopic){
+        var sec = document.getElementById('sec-' + slug(activeTopic));
+        if(sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+      render();
+    });
+  }
+
+  function buildSegbar(){
+    TOPICS.forEach(function(t){
+      var items = byTopic[t] || [];
+      var seg = document.createElement('div');
+      seg.className = 'seg';
+      seg.style.width = (items.length / TOTAL * 100) + '%';
+      seg.title = t + ' — ' + items.length;
+      var fill = document.createElement('div');
+      fill.className = 'fill';
+      fill.dataset.topic = t;
+      seg.appendChild(fill);
+      segbarEl.appendChild(seg);
+    });
+  }
+
+  function slug(t){
+    return t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  }
+
+  function rowHtml(it, i){
+    var checked = !!solved[it.id];
+    var companies = it.companies ? '<span class="companies" title="' + esc(it.companies) + '">' + esc(it.companies) + '</span>' : '';
+    var note = it.note ? '<span class="note">' + esc(it.note) + '</span>' : '';
+    var bonusTag = it.bonus ? '<span class="tag bonus">Bonus</span>' : '';
+    var href = it.link ? esc(it.link) : '#';
+    return (
+      '<div class="row' + (checked ? ' done' : '') + '" data-id="' + it.id + '" data-search="' + esc((it.q + ' ' + (it.companies||'') + ' ' + it.topic).toLowerCase()) + '" data-bonus="' + (it.bonus?1:0) + '">' +
+        '<input class="chk" type="checkbox" ' + (checked ? 'checked' : '') + ' aria-label="Mark solved: ' + esc(it.q) + '" />' +
+        '<div class="q-main">' +
+          '<a class="q-link" href="' + href + '" target="_blank" rel="noopener">' + esc(it.q) + GO_ICON + '</a>' +
+          '<div class="meta">' + bonusTag + companies + note + '</div>' +
+        '</div>' +
+        '<a class="practice-link" href="' + href + '" target="_blank" rel="noopener">Practice ↗</a>' +
+        '<span class="companies">' + (it.companies ? esc(it.companies.split(/\s+/).slice(0,3).join(' · ')) : 'Community') + '</span>' +
+        '<button class="bookmark' + (bookmarks[it.id] ? ' saved' : '') + '" type="button" data-bookmark="' + it.id + '" aria-label="Save ' + esc(it.q) + '">' + (bookmarks[it.id] ? '★' : '☆') + '</button>' +
+        '<div class="row-idx">' + (i+1) + '</div>' +
+      '</div>'
+    );
+  }
+
+  function buildList(){
+    var frag = document.createDocumentFragment();
+    TOPICS.forEach(function(t, ti){
+      var items = byTopic[t] || [];
+      if(!items.length) return;
+      var section = document.createElement('section');
+      section.className = 'topic-section';
+      section.id = 'sec-' + slug(t);
+      section.dataset.topic = t;
+
+      var head = document.createElement('div');
+      head.className = 'topic-head';
+      head.innerHTML =
+        '<span class="idx">' + String(ti+1).padStart(2,'0') + '</span>' +
+        '<h2>' + esc(t) + '</h2>' +
+        '<span class="tcount" data-role="tcount">0 / ' + items.length + '</span>' +
+        '<div class="tbar"><div class="fill" data-role="tfill"></div></div>';
+      section.appendChild(head);
+
+      var rowsWrap = document.createElement('div');
+      rowsWrap.innerHTML = '<div class="table-labels"><span>Status</span><span>Problem</span><span>Practice</span><span>Companies</span></div>' + items.map(function(it,i){ return rowHtml(it,i); }).join('');
+      section.appendChild(rowsWrap);
+
+      frag.appendChild(section);
+    });
+    listEl.appendChild(frag);
+
+    listEl.addEventListener('change', function(e){
+      if(!e.target.classList.contains('chk')) return;
+      var row = e.target.closest('.row');
+      var id = row.dataset.id;
+      if(e.target.checked){ solved[id] = true; } else { delete solved[id]; }
+      persist();
+      row.classList.toggle('done', e.target.checked);
+      updateStats();
+    });
+    listEl.addEventListener('click', function(e){
+      var bookmark=e.target.closest('.bookmark');
+      if(bookmark){
+        var id=bookmark.dataset.bookmark;
+        if(bookmarks[id]) delete bookmarks[id]; else bookmarks[id]=true;
+        persistBookmarks();
+        bookmark.classList.toggle('saved',!!bookmarks[id]);
+        bookmark.textContent=bookmarks[id]?'★':'☆';
+        render();
+        return;
+      }
+      var head=e.target.closest('.topic-head');
+      if(!head) return;
+      var section=head.closest('.topic-section');
+      var topic=section.dataset.topic;
+      activeTopic=activeTopic===topic?null:topic;
+      Array.prototype.forEach.call(railEl.querySelectorAll('.pill'), function(p){p.classList.toggle('active',p.dataset.topic===activeTopic);});
+      render();
+    });
+  }
+
+  function updateStats(){
+    var solvedTotal = 0;
+    var perTopicSolved = {};
+    TOPICS.forEach(function(t){ perTopicSolved[t] = 0; });
+    ITEMS.forEach(function(it){
+      if(solved[it.id]){
+        solvedTotal++;
+        perTopicSolved[it.topic] = (perTopicSolved[it.topic]||0) + 1;
+      }
+    });
+
+    solvedCountEl.textContent = solvedTotal;
+    totalCountEl.textContent = '/ ' + TOTAL + ' solved';
+    pctLabelEl.textContent = Math.round(solvedTotal / TOTAL * 100) + '%';
+
+    TOPICS.forEach(function(t){
+      var items = byTopic[t] || [];
+      var s = perTopicSolved[t] || 0;
+      var pct = items.length ? (s / items.length * 100) : 0;
+
+      var segFill = segbarEl.querySelector('.fill[data-topic="' + cssEsc(t) + '"]');
+      if(segFill) segFill.style.width = pct + '%';
+
+      var sec = document.getElementById('sec-' + slug(t));
+      if(sec){
+        var tfill = sec.querySelector('[data-role="tfill"]');
+        var tcount = sec.querySelector('[data-role="tcount"]');
+        if(tfill) tfill.style.width = pct + '%';
+        if(tcount) tcount.textContent = s + ' / ' + items.length;
+      }
+
+      var pill = railEl.querySelector('.pill[data-topic="' + cssEsc(t) + '"]');
+      if(pill){
+        var ring = pill.querySelector('.n');
+        if(ring) ring.textContent = s + '/' + items.length;
+      }
+    });
+    updateDailyProgress();
+  }
+
+  function updateDailyProgress(){
+    var saved; try{saved=JSON.parse(localStorage.getItem(TARGET_KEY)||'null');}catch(e){}
+    if(!saved){ dailyCount.textContent='Set a target to see today’s plan.'; return; }
+    var schedule=getSchedule();
+    var today=new Date(); today.setHours(0,0,0,0);
+    var start=new Date(schedule.start); start.setHours(0,0,0,0);
+    var index=Math.floor((today-start)/86400000);
+    if(index<0){dailyCount.textContent='Your plan begins '+schedule.start.toLocaleDateString(undefined,{month:'short',day:'numeric'})+'.'; return;}
+    if(index>=schedule.days){dailyCount.textContent='Plan complete · '+Object.keys(solved).length+'/'+TOTAL+' solved'; return;}
+    var set=schedule.assignments[index];
+    var done=set.filter(function(item){return !!solved[item.id];}).length;
+    dailyCount.textContent='Day '+(index+1)+' · '+done+'/'+set.length+' solved today';
+  }
+
+  function cssEsc(s){
+    return String(s).replace(/["\\]/g, '\\$&');
+  }
+
+  function localDate(){ return new Date().toISOString().slice(0,10); }
+  function selectedItems(){ return targetTopic.value === 'All topics' ? ITEMS : (byTopic[targetTopic.value] || []); }
+  function addDays(date, count){ var d=new Date(date); d.setDate(d.getDate()+count); return d; }
+  function dateValue(value){ return new Date(value+'T00:00:00'); }
+  function getSchedule(){
+    var start = targetStart.value ? dateValue(targetStart.value) : new Date();
+    var end = targetEnd.value ? dateValue(targetEnd.value) : addDays(start,89);
+    if(end < start){ end=start; targetEnd.value=targetStart.value; }
+    var days=Math.max(1,Math.round((end-start)/86400000)+1);
+    var chosen=selectedItems(); var assignments=[]; for(var a=0;a<days;a++) assignments.push([]);
+    chosen.forEach(function(item,index){ assignments[Math.min(days-1,Math.floor(index*days/chosen.length))].push(item); });
+    return {start:start,days:days,items:chosen,assignments:assignments};
+  }
+  function renderTargetPreview(){
+    var schedule=getSchedule(), days=schedule.days, count=schedule.items.length, start=schedule.start;
+    var daily = Math.max(1, Math.ceil(count/days));
+    planLength.textContent = days + ' day' + (days === 1 ? '' : 's');
+    planPace.textContent = count + ' questions · about ' + daily + ' / day';
+    calendarDays.innerHTML = '';
+    for(var i=0;i<days;i++){
+      var d = new Date(start); d.setDate(start.getDate()+i);
+      var cell = document.createElement('div');
+      var dayNo = i + 1;
+      var set=schedule.assignments[i]; var labels=[];
+      set.forEach(function(item){ if(labels.indexOf(item.topic)===-1) labels.push(item.topic); });
+      cell.className = 'target-day';
+      cell.innerHTML = d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + '<small>Day '+dayNo+' · '+set.length+' question'+(set.length===1?'':'s')+'</small><small class="target-topic">'+esc(labels.join(', '))+'</small>';
+      calendarDays.appendChild(cell);
+    }
+  }
+  function loadTarget(){
+    TOPICS.forEach(function(t){ var o=document.createElement('option');o.value=t;o.textContent=t;targetTopic.appendChild(o); });
+    var saved; try{ saved=JSON.parse(localStorage.getItem(TARGET_KEY)||'null'); }catch(e){}
+    targetStart.value=(saved&&saved.start)||localDate(); targetEnd.value=(saved&&saved.end)||localDate(); if(!saved) targetEnd.value=addDays(dateValue(targetStart.value),89).toISOString().slice(0,10); targetTopic.value=(saved&&saved.topic)||'All topics';
+    if(saved){ targetNote.textContent = saved.topic + ' · ' + saved.start + ' to ' + saved.end; viewCalendar.classList.add('show'); }
+    renderTargetPreview();
+  }
+
+  function render(){
+    var q = searchInput.value.trim().toLowerCase();
+    var hideSolved = hideSolvedCb.checked;
+    var bonusOnly = bonusOnlyCb.checked;
+    var anyVisible = false;
+
+    var rows = listEl.querySelectorAll('.row');
+    Array.prototype.forEach.call(rows, function(row){
+      var topic = row.closest('.topic-section').dataset.topic;
+      var matchesTopic = activeTopic === topic;
+      var matchesSearch = !q || row.dataset.search.indexOf(q) !== -1;
+      var matchesSolved = !hideSolved || !row.classList.contains('done');
+      var matchesBonus = !bonusOnly || row.dataset.bonus === '1';
+      var matchesSaved = !savedOnly || !!bookmarks[row.dataset.id];
+      var show = matchesTopic && matchesSearch && matchesSolved && matchesBonus && matchesSaved;
+      row.classList.toggle('hidden', !show);
+      if(show) anyVisible = true;
+    });
+
+    var sections = listEl.querySelectorAll('.topic-section');
+    Array.prototype.forEach.call(sections, function(sec){ sec.style.display=''; });
+
+    emptyEl.textContent = activeTopic ? 'No problems match that search.' : 'Choose a topic above to open its problem set.';
+    emptyEl.style.display = anyVisible ? 'none' : 'block';
+    Array.prototype.forEach.call(sections, function(sec){ sec.classList.toggle('is-open', sec.dataset.topic === activeTopic && sec.style.display !== 'none'); });
+  }
+
+  searchInput.addEventListener('input', render);
+  hideSolvedCb.addEventListener('change', function(){
+    hideSolvedWrap.classList.toggle('on', hideSolvedCb.checked);
+    render();
+  });
+  bonusOnlyCb.addEventListener('change', function(){
+    bonusOnlyWrap.classList.toggle('on', bonusOnlyCb.checked);
+    render();
+  });
+  savedOnlyBtn.addEventListener('click', function(){ savedOnly=!savedOnly; savedOnlyBtn.classList.toggle('on',savedOnly); savedOnlyBtn.textContent=savedOnly?'★ Saved':'☆ Saved'; render(); });
+  resetBtn.addEventListener('click', function(){
+    if(!confirm('Clear all solved checkmarks on this device?')) return;
+    solved = {};
+    persist();
+    Array.prototype.forEach.call(listEl.querySelectorAll('.chk'), function(cb){ cb.checked = false; });
+    Array.prototype.forEach.call(listEl.querySelectorAll('.row'), function(r){ r.classList.remove('done'); });
+    updateStats();
+  });
+
+  document.getElementById('openCalendar').addEventListener('click', function(){ calendarCard.classList.remove('calendar-only'); calendarTitle.textContent='Create your study plan'; calendarIntro.textContent='Choose your time window and focus. We’ll distribute the selected questions across every day.'; calendarModal.classList.add('open'); renderTargetPreview(); });
+  viewCalendar.addEventListener('click', function(){ calendarCard.classList.add('calendar-only'); calendarTitle.textContent='Your study calendar'; calendarIntro.textContent='Each day shows its date, assigned topics, and the number of questions to complete.'; calendarModal.classList.add('open'); renderTargetPreview(); });
+  document.getElementById('closeCalendar').addEventListener('click', function(){ calendarModal.classList.remove('open'); });
+  calendarModal.addEventListener('click', function(e){ if(e.target === calendarModal) calendarModal.classList.remove('open'); });
+  [targetStart,targetEnd,targetTopic].forEach(function(el){ el.addEventListener('input',renderTargetPreview); el.addEventListener('change',renderTargetPreview); });
+  document.getElementById('saveTarget').addEventListener('click', function(){
+    var target={start:targetStart.value,end:targetEnd.value,topic:targetTopic.value};
+    try{localStorage.setItem(TARGET_KEY,JSON.stringify(target));}catch(e){}
+    targetNote.textContent=target.topic+' · '+target.start+' to '+target.end;
+    viewCalendar.classList.add('show');
+    updateDailyProgress();
+    queueCloudSave();
+    calendarModal.classList.remove('open');
+  });
+
+  authSwitch.addEventListener('click', function(){ setAuthMode(authMode==='signin'?'signup':'signin'); });
+  authForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    authMessage.textContent=''; authSubmit.disabled=true;
+    var email=authEmail.value.trim(), password=authPassword.value;
+    var result;
+    if(authMode==='signup') result=await supabaseClient.auth.signUp({email:email,password:password});
+    else result=await supabaseClient.auth.signInWithPassword({email:email,password:password});
+    authSubmit.disabled=false;
+    if(result.error){ authMessage.textContent=result.error.message; return; }
+    if(authMode==='signup' && !(result.data&&result.data.session)){
+      setAuthMode('signin'); authMessage.textContent='Account created. Check your email to confirm it, then sign in.'; authMessage.className='auth-message ok'; return;
+    }
+    if(result.data&&result.data.user) await setSignedInUser(result.data.user);
+  });
+  document.getElementById('accountButton').addEventListener('click', async function(){
+    if(!currentUser) return;
+    if(!confirm('Sign out of this account? Your progress is safely synced.')) return;
+    await saveCloudProgress();
+    await supabaseClient.auth.signOut();
+  });
+
+  buildRail();
+  buildSegbar();
+  buildList();
+  loadTarget();
+  updateStats();
+  render();
+  setAuthMode('signin');
+  initAuth();
+})();
+
+</script>
+</body>
+</html>
